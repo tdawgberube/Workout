@@ -427,7 +427,7 @@
     {id:"shr",short:"Shrimp",qty:8,unit:"oz",item:"shrimp",cal:235,p:45,c:0,f:3},
     {id:"sal",short:"Salmon",qty:6,unit:"oz",item:"salmon",cal:350,p:34,c:0,f:22},
     {id:"sau",short:"Sausage",qty:2,unit:"",item:"chicken sausages",cal:200,p:22,c:4,f:12},
-    {id:"prk",short:"Pork",qty:7,unit:"oz",item:"pork tenderloin",cal:260,p:48,c:0,f:7},
+    {id:"prk",short:"Pork",qty:7,unit:"oz",item:"pork loin, diced",cal:260,p:48,c:0,f:7},
     {id:"cod",short:"Cod",qty:8,unit:"oz",item:"cod",cal:205,p:45,c:0,f:2},
   ];
   const carbs = [
@@ -453,13 +453,15 @@
   // styles = sauce + method only. {p}=protein {c}=carb {v}=veggie. Lists compatible proteins & carbs; veggies are universal.
   const styles = [
     {id:"stirfry",name:"Stir-Fry",sauce:"soy-ginger sauce",cal:40,p:1,c:6,f:2,steps:["Stir-fry the {v} 2–3 min.","Add the cooked {p} and soy-ginger, toss.","Serve over {c}."],proteins:["chk","bf","shr","trk","prk"],carbs:["rice","cauli","none","pasta"]},
-    {id:"fajita",name:"Fajita",sauce:"salsa, cheese, fajita seasoning",cal:110,p:5,c:6,f:8,steps:["Skillet the {p} and {v} with fajita seasoning until charred.","Top with salsa and cheese.","Serve with {c}."],proteins:["chk","stk","shr","bf"],carbs:["rice","tort","cauli","none"]},
+    {id:"fajita",name:"Fajita",sauce:"salsa, cheese, fajita seasoning",cal:110,p:5,c:6,f:8,steps:["Skillet the {p} and {v} with fajita seasoning until charred.","Top with salsa and cheese.","Serve with {c}."],proteins:["chk","stk","shr","bf","prk"],carbs:["rice","tort","cauli","none"]},
     {id:"garlicbutter",name:"Garlic Butter",sauce:"garlic butter + lemon",cal:100,p:1,c:2,f:9,steps:["Sear the {p}.","Add butter, garlic, lemon; toss the {v} to finish.","Serve with {c}."],proteins:["chk","shr","stk","prk","cod"],carbs:["potato","rice","none","cauli"]},
-    {id:"cajun",name:"Cajun",sauce:"cajun + a drizzle of sweet chili",cal:40,p:1,c:6,f:1,steps:["Season the {p} with cajun and cook.","Add the {v}; finish with a drizzle of sweet chili.","Serve over {c}."],proteins:["shr","chk","stk"],carbs:["rice","cauli","none"]},
-    {id:"taco",name:"Taco",sauce:"salsa, cheese, taco seasoning",cal:110,p:6,c:4,f:8,steps:["Cook the {p} with taco seasoning.","Serve over {c} with {v}, salsa, and cheese."],proteins:["bf","trk","chk"],carbs:["rice","tort","cauli","none"]},
-    {id:"teriyaki",name:"Teriyaki",sauce:"teriyaki glaze",cal:50,p:1,c:11,f:0,steps:["Cook the {p}, glaze with teriyaki.","Steam the {v}.","Serve over {c}."],proteins:["chk","bf","shr","sal"],carbs:["rice","cauli","none"]},
+    {id:"cajun",name:"Cajun",sauce:"cajun + a drizzle of sweet chili",cal:40,p:1,c:6,f:1,steps:["Season the {p} with cajun and cook.","Add the {v}; finish with a drizzle of sweet chili.","Serve over {c}."],proteins:["shr","chk","stk","prk"],carbs:["rice","cauli","none"]},
+    {id:"taco",name:"Taco",sauce:"salsa, cheese, taco seasoning",cal:110,p:6,c:4,f:8,steps:["Cook the {p} with taco seasoning.","Serve over {c} with {v}, salsa, and cheese."],proteins:["bf","trk","chk","prk"],carbs:["rice","tort","cauli","none"]},
+    {id:"teriyaki",name:"Teriyaki",sauce:"teriyaki glaze",cal:50,p:1,c:11,f:0,steps:["Cook the {p}, glaze with teriyaki.","Steam the {v}.","Serve over {c}."],proteins:["chk","bf","shr","sal","prk"],carbs:["rice","cauli","none"]},
     {id:"lemongarlic",name:"Lemon-Garlic",sauce:"olive oil, lemon, garlic",cal:90,p:1,c:2,f:8,steps:["Lay the {p} and {v} on a sheet pan.","Drizzle olive oil, lemon, garlic; roast 400°F.","Serve with {c}."],proteins:["cod","sal","chk","prk"],carbs:["potato","rice","none"]},
     {id:"bbq",name:"BBQ",sauce:"BBQ sauce",cal:70,p:0,c:16,f:0,steps:["Cook the {p}, brush with BBQ in the last minute.","Serve with {c} and {v}."],proteins:["chk","bf","prk","sau"],carbs:["rice","potato","none"]},
+    {id:"honeygarlic",name:"Honey Garlic",sauce:"honey-garlic glaze",cal:90,p:1,c:18,f:1,steps:["Skillet the {p} until browned.","Add honey, garlic, and a splash of soy; simmer to a sticky glaze.","Toss the {v}; serve over {c}."],proteins:["prk","chk","shr","bf","sal"],carbs:["rice","cauli","none"]},
+    {id:"sweetsour",name:"Sweet & Sour",sauce:"sweet & sour sauce, peppers, pineapple",cal:120,p:1,c:26,f:1,steps:["Skillet the {p} with peppers and the {v}.","Add sweet & sour sauce and a little pineapple; toss.","Serve over {c}."],proteins:["prk","chk","shr"],carbs:["rice","cauli","none"]},
   ];
   const breakfasts = [
     {id:"b1",name:"Power Scramble",ing:"1.25 cup egg whites, 2 whole eggs, 2 cup spinach",cal:440,p:49,c:34,f:10,steps:["Spray a nonstick pan, medium heat.","Scramble egg whites + whole eggs.","Toss spinach in to wilt; hot sauce or salsa on top."]},
