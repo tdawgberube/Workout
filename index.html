@@ -281,6 +281,11 @@
   .lograw .ld span{color:var(--mute);font-size:12px;font-weight:600;font-family:'Barlow Semi Condensed';}
   .lograw b{font-family:'Bebas Neue';font-size:24px;letter-spacing:.03em;color:var(--ink);}
 
+  /* Music */
+  .catgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;}
+  .catbtn{display:block;text-decoration:none;text-align:center;font-family:'Bebas Neue';font-size:19px;letter-spacing:.03em;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px 8px;}
+  .catbtn:active{border-color:var(--acc);color:var(--acc);}
+
   /* Placeholder tabs */
   .soon{
     text-align:center;padding:54px 20px;background:var(--panel);border:1px dashed var(--line);
@@ -314,6 +319,7 @@
     <button class="tab" data-t="lower">Lower</button>
     <button class="tab" data-t="how">How To</button>
     <button class="tab" data-t="timer">Log</button>
+    <button class="tab" data-t="music">Music</button>
     <button class="tab" data-t="meals">Meals</button>
     <button class="tab" data-t="supps">Supps</button>
   </nav>
@@ -361,6 +367,15 @@
     <div class="dayhead"><h2>Workout Log</h2><div class="tag"><a class="mini" id="woClear">clear</a></div></div>
     <p class="note" style="margin-top:0;">Start the timer on the Upper or Lower page. When you hit Stop there, the session lands here with the day and total time.</p>
     <div id="woLog"></div>
+  </section>
+
+  <!-- MUSIC -->
+  <section class="panel" id="music">
+    <div class="dayhead"><h2>Music</h2><div class="tag">Opens your music app</div></div>
+    <div class="cat">Play on</div>
+    <div class="chips" id="musicSvc"></div>
+    <div class="catgrid" id="musicCats"></div>
+    <p class="cnote">Pick a vibe and it opens that app to a playlist. Start it there, then come back &mdash; the music keeps playing in the background while you train.</p>
   </section>
 
   <!-- MEALS -->
@@ -563,13 +578,14 @@
   let editing = null;   // {wi, si} of the meal being edited
   let woLog = [];       // logged workouts {date, secs}
   let woRunning=false, woElapsed=0, woIV=null;
+  let musicSvc = "youtube";
 
   // ---- LOCAL SAVE ----
   const SAVE_KEY = 'poolProgram.v3';
   const A = s => [...s];
   function save(){
     try{
-      const s={goal:curGoal, weeks, blacklist:A(blacklist), shopEmail, workoutLog:woLog,
+      const s={goal:curGoal, weeks, blacklist:A(blacklist), shopEmail, workoutLog:woLog, musicSvc,
         proteins:A(proteinsOn), carbs:A(carbsOn), veggies:A(veggiesOn), styles:A(stylesOn), bfs:A(bfOn), caps:A(capOn)};
       ['cw','cg','cft','cin','ca','cact','cgoal'].forEach(id=>{const el=document.getElementById(id); if(el) s[id]=el.value;});
       localStorage.setItem(SAVE_KEY, JSON.stringify(s));
@@ -585,6 +601,7 @@
     blacklist.clear(); (s.blacklist||[]).forEach(x=>blacklist.add(x));
     shopEmail = s.shopEmail || "";
     woLog = Array.isArray(s.workoutLog) ? s.workoutLog : [];
+    musicSvc = s.musicSvc || "youtube";
     weeks = Array.isArray(s.weeks) ? s.weeks.filter(w=>w&&Array.isArray(w.slots)) : [];
   }
   function buildCatalog(){ /* components are static */ }
@@ -1013,6 +1030,31 @@
   document.querySelectorAll('.wobtn').forEach(b=>b.addEventListener('click',()=>woToggle(b.dataset.day)));
   const wc=document.getElementById('woClear'); if(wc) wc.addEventListener('click',()=>{ woLog=[]; save(); renderLog(); });
   paintBars(); renderLog();
+
+  // ---- MUSIC LAUNCHER ----
+  const musicSvcs=[{id:'youtube',name:'YouTube'},{id:'spotify',name:'Spotify'},{id:'apple',name:'Apple Music'}];
+  const musicCats=[
+    {name:'70s Rock',q:'70s rock'},{name:'80s Rock',q:'80s rock'},
+    {name:'90s Rock',q:'90s rock'},{name:'2000s Rock',q:'2000s rock'},
+    {name:'Classic Rock',q:'classic rock'},{name:'80s Pop',q:'80s pop'},
+    {name:'90s Pop',q:'90s pop'},{name:'2000s Pop',q:'2000s pop hits'},
+    {name:'Hip-Hop',q:'hip hop hits'},{name:'Country',q:'country hits'},
+    {name:'Gym Hype',q:'gym workout hype'},{name:'Chill',q:'chill mix'},
+  ];
+  function musicURL(svc,q){
+    const e=encodeURIComponent;
+    if(svc==='spotify') return 'https://open.spotify.com/search/'+e(q);
+    if(svc==='apple') return 'https://music.apple.com/search?term='+e(q);
+    return 'https://www.youtube.com/results?search_query='+e(q+' playlist');
+  }
+  function renderMusic(){
+    const sv=document.getElementById('musicSvc');
+    sv.innerHTML=musicSvcs.map(s=>`<button class="chip ${s.id===musicSvc?'on':''}" data-svc="${s.id}">${s.name}</button>`).join('');
+    sv.querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{ musicSvc=b.dataset.svc; save(); renderMusic(); }));
+    document.getElementById('musicCats').innerHTML=
+      musicCats.map(c=>`<a class="catbtn" href="${musicURL(musicSvc,c.q)}" target="_blank" rel="noopener">${c.name}</a>`).join('');
+  }
+  renderMusic();
 
   // Tabs
   const tabs=document.querySelectorAll('.tab');
