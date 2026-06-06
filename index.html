@@ -275,11 +275,7 @@
   .wobtn{font-family:'Bebas Neue';font-size:18px;letter-spacing:.05em;color:#0c0f12;background:var(--acc);border:none;border-radius:9px;padding:8px 18px;cursor:pointer;}
   .wobtn.stop{background:var(--ok);}
   .wonote{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);font-weight:600;margin-left:auto;}
-  .lineupbar{display:flex;align-items:center;gap:11px;margin-bottom:10px;}
-  .shufbtn{font-family:'Bebas Neue';font-size:16px;letter-spacing:.05em;color:var(--acc);background:var(--acc-soft);border:1px solid rgba(255,92,43,.3);border-radius:9px;padding:8px 14px;cursor:pointer;white-space:nowrap;}
-  .shufbtn:active{background:rgba(255,92,43,.22);}
-  .lineupnote{font-size:10.5px;color:var(--mute);font-weight:600;line-height:1.3;letter-spacing:.01em;}
-  .nudge{background:var(--acc-soft);border:1px solid rgba(255,92,43,.3);color:var(--ink);border-radius:11px;padding:10px 13px;margin-bottom:10px;font-size:12.5px;line-height:1.4;}
+  .lineupnote{display:block;font-size:11px;color:var(--mute);font-weight:600;line-height:1.4;letter-spacing:.01em;margin:-2px 0 11px;}
   .swapb{flex:0 0 auto;font-size:16px;line-height:1;color:var(--acc);background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:6px 9px;cursor:pointer;}
   .swapb:active{background:var(--acc-soft);}
   .lograw{display:flex;justify-content:space-between;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:11px 14px;margin-bottom:7px;}
@@ -287,6 +283,8 @@
   .lograw .ld em{font-style:normal;font-family:'Barlow Semi Condensed';font-weight:700;font-size:14px;color:var(--acc);letter-spacing:.04em;text-transform:uppercase;}
   .lograw .ld span{color:var(--mute);font-size:12px;font-weight:600;font-family:'Barlow Semi Condensed';}
   .lograw b{font-family:'Bebas Neue';font-size:24px;letter-spacing:.03em;color:var(--ink);}
+  .logdel{margin-left:12px;flex:0 0 auto;font-size:18px;line-height:1;color:var(--mute);background:none;border:none;cursor:pointer;padding:2px 4px;}
+  .logdel:active{color:var(--acc);}
 
   /* Music */
   .catgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;}
@@ -309,7 +307,7 @@
 <div class="wrap">
 
   <header>
-    <div class="kicker">Pool Sessions &middot; Dumbbell + KB</div>
+    <div class="kicker">Circuit Work &middot; Dumbbell + KB</div>
     <h1>BUILT<span>.</span></h1>
     <div class="sub">Upper / Lower hypertrophy &middot; one bench, two lifters</div>
 
@@ -335,8 +333,8 @@
   <section class="panel on" id="upper">
     <div class="dayhead"><h2>Upper Day</h2><div class="tag">Circuit &middot; heavy&rarr;light</div></div>
     <div class="wobar"><span class="woclock">0:00</span><button class="wobtn" data-day="Upper">Start</button><span class="wonote">chimes every 30s</span></div>
-    <div class="lineupbar"><button class="shufbtn" data-day="Upper">&#10772; Shuffle</button><span class="lineupnote">Run this lineup 3&ndash;4 weeks, push weight or reps, then shuffle.</span></div>
-    <div class="nudge" id="upperNudge" style="display:none;"></div>
+    <p class="lineupnote">The 30s chime is a pacing nudge so you don't rest too long mid-circuit &mdash; not a cue to change moves. Go at your own tempo, hold planks as long as you want, then rest 1&ndash;2 min between full circuits.</p>
+    <p class="lineupnote">Tap &#8644; on any move to swap it. Run a lineup 3&ndash;4 weeks, push weight or reps, then swap in new ones.</p>
     <ol id="upperList"></ol>
   </section>
 
@@ -344,8 +342,8 @@
   <section class="panel" id="lower">
     <div class="dayhead"><h2>Lower Day</h2><div class="tag">Circuit &middot; heavy&rarr;light</div></div>
     <div class="wobar"><span class="woclock">0:00</span><button class="wobtn" data-day="Lower">Start</button><span class="wonote">chimes every 30s</span></div>
-    <div class="lineupbar"><button class="shufbtn" data-day="Lower">&#10772; Shuffle</button><span class="lineupnote">Run this lineup 3&ndash;4 weeks, push weight or reps, then shuffle.</span></div>
-    <div class="nudge" id="lowerNudge" style="display:none;"></div>
+    <p class="lineupnote">The 30s chime is a pacing nudge so you don't rest too long mid-circuit &mdash; not a cue to change moves. Go at your own tempo, then rest 1&ndash;2 min between full circuits.</p>
+    <p class="lineupnote">Tap &#8644; on any move to swap it. Run a lineup 3&ndash;4 weeks, push weight or reps, then swap in new ones.</p>
     <ol id="lowerList"></ol>
   </section>
 
@@ -375,7 +373,7 @@
   <!-- TIMER / LOG -->
   <section class="panel" id="timer">
     <div class="dayhead"><h2>Workout Log</h2><div class="tag"><a class="mini" id="woClear">clear</a></div></div>
-    <p class="note" style="margin-top:0;">Start the timer on the Upper or Lower page. When you hit Stop there, the session lands here with the day and total time.</p>
+    <p class="note" style="margin-top:0;">Start the timer on the Upper or Lower page. When you hit Stop there, the session lands here with the day and total time. The chime every 30 seconds is just a pacing nudge to keep you from resting too long between moves &mdash; it's not telling you to switch exercises. Work at your own tempo and rest 1&ndash;2 minutes between full circuits. It chimes <i>over</i> your music; the app can't turn the music down itself, so the chime is made sharp to cut through.</p>
     <div id="woLog"></div>
   </section>
 
@@ -512,13 +510,11 @@
   let selUpper = bankUpper.map(()=>0);
   let selLower = bankLower.map(()=>0);
   const sels = {Upper:selUpper, Lower:selLower};
-  let lineupSince = {Upper:Date.now(), Lower:Date.now()};
-  const NUDGE_MS = 28*24*60*60*1000;
 
   // ---- audio (used by the workout-pace chime) ----
   let _actx=null;
   function primeAudio(){ try{ _actx=_actx||new (window.AudioContext||window.webkitAudioContext)(); if(_actx.state==='suspended') _actx.resume(); }catch(e){} }
-  function beep(t0,dur,freq){ const o=_actx.createOscillator(),g=_actx.createGain(); o.type='square'; o.frequency.value=freq; o.connect(g); g.connect(_actx.destination); g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(0.35,t0+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur); o.start(t0); o.stop(t0+dur+0.02); }
+  function beep(t0,dur,freq){ const o=_actx.createOscillator(),g=_actx.createGain(); o.type='square'; o.frequency.value=freq; o.connect(g); g.connect(_actx.destination); g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(0.7,t0+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur); o.start(t0); o.stop(t0+dur+0.02); }
 
   function renderDay(dayName){
     const bank=banks[dayName], sel=sels[dayName], el=document.getElementById(dayName==='Upper'?'upperList':'lowerList');
@@ -537,24 +533,11 @@
     el.querySelectorAll('.swapb').forEach(b=>b.addEventListener('click',()=>{
       const d=b.dataset.day, i=+b.dataset.slot, s=sels[d];
       s[i]=(s[i]+1)%banks[d][i].opts.length;
-      lineupSince[d]=Date.now(); saveWO(); renderDay(d); updateNudge(d);
+      saveWO(); renderDay(d);
     }));
-    updateNudge(dayName);
-  }
-  function shuffleDay(dayName){
-    const bank=banks[dayName], s=sels[dayName];
-    bank.forEach((slot,i)=>{ s[i]=Math.floor(Math.random()*slot.opts.length); });
-    lineupSince[dayName]=Date.now(); saveWO(); renderDay(dayName);
-  }
-  function updateNudge(dayName){
-    const n=document.getElementById(dayName==='Upper'?'upperNudge':'lowerNudge'); if(!n) return;
-    const due = Date.now()-lineupSince[dayName] > NUDGE_MS;
-    n.style.display = due?'block':'none';
-    if(due) n.innerHTML='You\u2019ve run this lineup ~4 weeks &mdash; tap <b>Shuffle</b> to mix it up.';
   }
   function saveWO(){ try{ save(); }catch(e){} }
   function renderWorkouts(){ renderDay('Upper'); renderDay('Lower'); }
-  document.querySelectorAll('.shufbtn').forEach(b=>b.addEventListener('click',()=>shuffleDay(b.dataset.day)));
   renderWorkouts();
 
   // ---- MEAL ENGINE: pick proteins + carbs + veggies + styles; blacklist any combo ----
@@ -648,7 +631,7 @@
   function save(){
     try{
       const s={goal:curGoal, weeks, blacklist:A(blacklist), shopEmail, workoutLog:woLog, musicSvc,
-        selUpper, selLower, lineupSince,
+        selUpper, selLower,
         proteins:A(proteinsOn), carbs:A(carbsOn), veggies:A(veggiesOn), styles:A(stylesOn), bfs:A(bfOn), caps:A(capOn)};
       ['cw','cg','cft','cin','ca','cact','cgoal'].forEach(id=>{const el=document.getElementById(id); if(el) s[id]=el.value;});
       localStorage.setItem(SAVE_KEY, JSON.stringify(s));
@@ -667,7 +650,6 @@
     musicSvc = s.musicSvc || "youtube";
     if(Array.isArray(s.selUpper)&&s.selUpper.length===selUpper.length) s.selUpper.forEach((v,i)=>selUpper[i]=v|0);
     if(Array.isArray(s.selLower)&&s.selLower.length===selLower.length) s.selLower.forEach((v,i)=>selLower[i]=v|0);
-    if(s.lineupSince){ if(s.lineupSince.Upper) lineupSince.Upper=s.lineupSince.Upper; if(s.lineupSince.Lower) lineupSince.Lower=s.lineupSince.Lower; }
     weeks = Array.isArray(s.weeks) ? s.weeks.filter(w=>w&&Array.isArray(w.slots)) : [];
   }
   function buildCatalog(){ /* components are static */ }
@@ -993,7 +975,11 @@
   // ---- SUPPLEMENTS ----
   const supps = [
     {name:"Creatine Monohydrate", time:"5 g daily", items:["Any time of day, with or without food","No loading phase needed"]},
-    {name:"Men's Multivitamin", time:"1 tablet daily", items:["With a meal for absorption"]},
+    {name:"Vitamin D3", time:"2,000–4,000 IU daily", items:["Most people run low, especially indoors","Take with a meal that has some fat"]},
+    {name:"Omega-3 Fish Oil", time:"1–2 g EPA+DHA daily", items:["Joints, heart, recovery","With a meal to avoid fishy burps"]},
+    {name:"Men's Multivitamin", time:"1 tablet daily", items:["With a meal for absorption","Insurance, not magic"]},
+    {name:"Caffeine (pre-workout)", time:"100–200 mg, ~30 min before", items:["Coffee or a tablet both work","Skip it late in the day so sleep holds","Teens: keep under 100 mg/day — kids should skip it"]},
+    {name:"Electrolytes", time:"as needed on hot/circuit days", items:["Sodium, potassium, magnesium","Useful when you're sweating a lot or low-carb"]},
   ];
   document.getElementById('suppList').innerHTML = supps.map(m=>`
     <li class="meal">
@@ -1061,7 +1047,7 @@
   let woDay = null;
   function chime(){
     try{ if(navigator.vibrate) navigator.vibrate([400,150,400,150,400]); }catch(e){}
-    if(_actx){ let t=_actx.currentTime+0.01; for(let i=0;i<8;i++){ beep(t,0.25,i%2?988:784); t+=0.6; } } // ~5s, two-tone
+    if(_actx){ let t=_actx.currentTime+0.01; for(let i=0;i<9;i++){ beep(t,0.16,i%2?2093:1568); t+=0.34; } } // ~3s sharp two-tone alert
   }
   function woClock(s){ const m=Math.floor(s/60); return m+':'+String(s%60).padStart(2,'0'); }
   function paintBars(){
@@ -1072,8 +1058,11 @@
     const el=document.getElementById('woLog');
     if(!el) return;
     el.innerHTML = woLog.length
-      ? woLog.map(e=>`<div class="lograw"><div class="ld"><em>${e.day||'Workout'}</em><span>${e.date}</span></div><b>${woClock(e.secs)}</b></div>`).join('')
+      ? woLog.map((e,i)=>`<div class="lograw"><div class="ld"><em>${e.day||'Workout'}</em><span>${e.date}</span></div><b>${woClock(e.secs)}</b><button class="logdel" data-i="${i}" title="delete">&times;</button></div>`).join('')
       : '<p class="cnote">No sessions logged yet. Start the timer on Upper or Lower day.</p>';
+    el.querySelectorAll('.logdel').forEach(b=>b.addEventListener('click',()=>{
+      woLog.splice(+b.dataset.i,1); save(); renderLog();
+    }));
   }
   function woTick(){
     woElapsed++;
