@@ -90,6 +90,8 @@
   .exsub{display:block;font-size:11px;color:var(--mute);margin-top:1px;font-family:'Barlow Semi Condensed';font-weight:600;letter-spacing:.02em;}
   .exsub em{font-style:normal;color:var(--acc);}
   .explay{color:var(--acc);font-size:13px;flex:0 0 auto;}
+  .tbtn{flex:0 0 auto;font-family:'Bebas Neue';font-size:14px;letter-spacing:.05em;color:#0c0f12;background:var(--acc);border-radius:8px;padding:6px 11px;cursor:pointer;min-width:62px;text-align:center;}
+  .tbtn.run{background:var(--ok);color:#0c0f12;}
 
   /* Schedule */
   .sched{margin-top:16px;background:var(--panel-2);border:1px solid var(--line);border-radius:16px;padding:14px;}
@@ -227,6 +229,18 @@
   .wm-foot .yt.rec{margin-top:0;}
   .vetomeal{color:var(--mute);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;border-bottom:1px dashed var(--mute);}
   .vetomeal:active{color:var(--acc);}
+  .wm-edit{color:var(--acc);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
+  .editor{margin-top:10px;padding:12px;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;}
+  .edgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .edl{display:flex;flex-direction:column;font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);font-weight:700;gap:4px;margin-bottom:8px;}
+  .editor select,.editor input{font-family:'Barlow Semi Condensed';font-weight:600;font-size:14px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:9px;width:100%;-webkit-appearance:none;appearance:none;}
+  .editor select:focus,.editor input:focus{outline:none;border-color:var(--acc);}
+  .edbtn{font-family:'Bebas Neue';font-size:16px;letter-spacing:.04em;color:#0c0f12;background:var(--acc);border:none;border-radius:9px;padding:9px 16px;cursor:pointer;margin-top:2px;}
+  .edbtn.ghost{background:var(--panel);color:var(--acc);border:1px solid var(--line);width:100%;}
+  .edcustom{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px;}
+  .edct{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute);font-weight:700;}
+  .edrow2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .edcancel{display:inline-block;margin-top:10px;color:var(--mute);font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;cursor:pointer;}
   .prevlist{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px;}
   .prchip{font-family:'Barlow Semi Condensed';font-weight:600;font-size:12px;letter-spacing:.02em;color:var(--ink);background:var(--panel);border:1px solid var(--line);padding:6px 10px;border-radius:9px;cursor:pointer;text-align:left;}
   .prchip.off{opacity:.45;text-decoration:line-through;border-style:dashed;color:var(--mute);}
@@ -392,7 +406,7 @@
     {n:"DB Shrugs", pat:"Traps", w:"40–60 / hand", r:"12–15", yt:"https://www.youtube.com/watch?v=YJ2q8RkOFVw"},
     {n:"Overhead DB Triceps Ext.", pat:"Push", w:"30–45 single", r:"12–15", yt:"https://www.youtube.com/watch?v=O7e8j8K3cJo"},
     {n:"Standing DB Curl", pat:"Pull", w:"20–30 / hand", r:"12–15", yt:"https://www.youtube.com/watch?v=6DeLZ6cbgWQ"},
-    {n:"Plank", pat:"Core", w:"bodyweight", r:"30–45 sec", yt:"https://www.youtube.com/watch?v=BQu26ABuVS0"},
+    {n:"Plank", pat:"Core", w:"bodyweight", r:"30–45 sec", timer:30, yt:"https://www.youtube.com/watch?v=BQu26ABuVS0"},
   ];
   const lower = [
     {n:"Goblet Squat", pat:"Squat", w:"50–70 KB", r:"12–15", yt:"https://www.youtube.com/watch?v=6mf0oa2GGUc"},
@@ -412,8 +426,34 @@
           <span class="exn">${x.n}${x.bench?'<i class="bench">bench</i>':''}</span>
           <span class="exsub"><em>${x.pat}</em> &middot; ${x.r} &middot; ${x.w}</span>
         </span>
-        <span class="explay">&#9658;</span>
+        ${x.timer?`<span class="tbtn" role="button" data-sec="${x.timer}">Start ${x.timer}s</span>`:'<span class="explay">&#9658;</span>'}
       </a></li>`).join('');
+    document.getElementById(el).querySelectorAll('.tbtn').forEach(b=>b.addEventListener('click',e=>{
+      e.preventDefault(); e.stopPropagation(); startTimer(b);
+    }));
+  }
+
+  // ---- plank / interval timer (beep + vibrate at the end) ----
+  let _actx=null;
+  function primeAudio(){ try{ _actx=_actx||new (window.AudioContext||window.webkitAudioContext)(); if(_actx.state==='suspended') _actx.resume(); }catch(e){} }
+  function beep(t0,dur,freq){ const o=_actx.createOscillator(),g=_actx.createGain(); o.type='square'; o.frequency.value=freq; o.connect(g); g.connect(_actx.destination); g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(0.35,t0+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur); o.start(t0); o.stop(t0+dur+0.02); }
+  function alarm(){
+    try{ if(navigator.vibrate) navigator.vibrate([500,150,500,150,500,150,500,150,500,150,500,150,500]); }catch(e){}
+    if(_actx){ let t=_actx.currentTime+0.01; for(let i=0;i<16;i++){ beep(t,0.18,i%2?1180:760); t+=0.3; } }   // ~5s of beeps
+  }
+  function startTimer(b){
+    if(b.dataset.running) return;
+    primeAudio();                          // unlock audio on this tap (needed on iOS)
+    const total=+b.dataset.sec; let rem=total;
+    b.dataset.running='1'; b.classList.add('run'); b.textContent=rem+'s';
+    const iv=setInterval(()=>{
+      rem--;
+      if(rem<=0){
+        clearInterval(iv); alarm();
+        b.textContent='Done!';
+        setTimeout(()=>{ b.classList.remove('run'); b.textContent='Start '+total+'s'; delete b.dataset.running; },5000);
+      } else { b.textContent=rem+'s'; }
+    },1000);
   }
   render(upper,'upperList');
   render(lower,'lowerList');
@@ -498,6 +538,7 @@
   let weeks = [];
   let showPreview = false;
   let shopEmail = "";
+  let editing = null;   // {wi, si} of the meal being edited
 
   // ---- LOCAL SAVE ----
   const SAVE_KEY = 'poolProgram.v3';
@@ -583,6 +624,23 @@
   // ---- ASSEMBLE A MAIN ----
   const rnd = arr => arr[Math.floor(Math.random()*arr.length)];
   const clampMult = f => Math.max(1, Math.min(2, Math.round(f*4)/4));
+  function baseOf(s){
+    if(s.kind==='main'){const m=s.m;const pr=protById[m.pid],cb=carbById[m.cid],vg=vegById[m.vid],st=styleById[m.fid];return {cal:pr.cal+cb.cal+vg.cal+st.cal,p:pr.p+cb.p+vg.p+st.p};}
+    if(s.kind==='custom') return {cal:+s.cal||0,p:+s.p||0};
+    const o=s.kind==='bf'?bfById[s.id]:capById[s.id]; return {cal:o.cal,p:o.p};
+  }
+  // recompute portions so the day still aims at the calorie target after a manual swap (only mains scale)
+  function recomputeDay(d){
+    const bases=d.slots.map(baseOf);
+    let fixed=0, mainsBase=0;
+    d.slots.forEach((s,i)=>{ if(s.kind==='main') mainsBase+=bases[i].cal; else fixed+=bases[i].cal; });
+    const mult = mainsBase>0 ? clampMult((target.cal-fixed)/mainsBase) : 1;
+    d.slots.forEach((s,i)=>{
+      if(s.kind==='main'){ s.mult=mult; s.cal=Math.round(bases[i].cal*mult); s.p=Math.round(bases[i].p*mult); }
+      else { s.mult=1; s.cal=bases[i].cal; s.p=bases[i].p; }
+    });
+    d.cal=d.slots.reduce((a,s)=>a+s.cal,0); d.p=d.slots.reduce((a,s)=>a+s.p,0);
+  }
   function pickMain(){
     const combos=validCombos().filter(c=>!blacklist.has(c.key));
     const vOpts=[...veggiesOn];
@@ -662,7 +720,7 @@
         addQty(veg,vg.item,vg.qty*mult*7,vg.unit);
         st.sauce.split(',').forEach(x=>pantry.add(x.trim()));
       }else{
-        const o=s.kind==='bf'?bfById[s.id]:capById[s.id];
+        const o=s.kind==='custom'?{name:s.name||'My Recipe',ing:s.ing||''}:(s.kind==='bf'?bfById[s.id]:capById[s.id]);
         bfn.push(`${o.name} x7 — ${o.ing}`);
       }
     });
@@ -676,10 +734,43 @@
     return t;
   }
 
-  function slotName(s){ return s.kind==="main" ? mainName(s.m) : (s.kind==="bf"?bfById[s.id]:capById[s.id]).name; }
-  function slotServing(s){ return s.kind==="main" ? mainServing(s.m,s.mult) : (s.kind==="bf"?bfById[s.id]:capById[s.id]).ing; }
-  function slotSteps(s){ return s.kind==="main" ? mainSteps(s.m) : (s.kind==="bf"?bfById[s.id]:capById[s.id]).steps; }
-  function slotQuery(s){ if(s.kind==="main"){const st=styleById[s.m.fid],pr=protById[s.m.pid];return st.name+' '+pr.short;} return slotName(s); }
+  function slotName(s){ if(s.kind==="custom") return s.name||"My Recipe"; return s.kind==="main" ? mainName(s.m) : (s.kind==="bf"?bfById[s.id]:capById[s.id]).name; }
+  function slotServing(s){ if(s.kind==="custom") return s.ing||"(your recipe)"; return s.kind==="main" ? mainServing(s.m,s.mult) : (s.kind==="bf"?bfById[s.id]:capById[s.id]).ing; }
+  function slotSteps(s){ if(s.kind==="custom") return s.steps||[]; return s.kind==="main" ? mainSteps(s.m) : (s.kind==="bf"?bfById[s.id]:capById[s.id]).steps; }
+  function slotQuery(s){ if(s.kind==="custom") return s.name||""; if(s.kind==="main"){const st=styleById[s.m.fid],pr=protById[s.m.pid];return st.name+' '+pr.short;} return slotName(s); }
+
+  // ---- inline meal editor ----
+  function editorHTML(s){
+    let swap='';
+    const opt=(arr,cur)=>arr.map(o=>`<option value="${o.id}" ${o.id===cur?'selected':''}>${o.name||o.short}</option>`).join('');
+    if(s.label==='Breakfast' || s.label==='Nightcap'){
+      const list=s.label==='Breakfast'?breakfasts:shakesArr;
+      const cur=s.kind==='custom'?'':s.id;
+      swap=`<label class="edl">${s.label}<select data-ed="pick">${opt(list,cur)}</select></label>
+            <button class="edbtn" data-ed="applypick">Use this</button>`;
+    }else{
+      const m=s.kind==='main'?s.m:{fid:styles[0].id,pid:proteins[0].id,cid:carbs[0].id,vid:veggies[0].id};
+      swap=`<div class="edgrid">
+        <label class="edl">Style<select data-edk="fid">${opt(styles,m.fid)}</select></label>
+        <label class="edl">Protein<select data-edk="pid">${opt(proteins,m.pid)}</select></label>
+        <label class="edl">Carb<select data-edk="cid">${opt(carbs,m.cid)}</select></label>
+        <label class="edl">Veggie<select data-edk="vid">${opt(veggies,m.vid)}</select></label>
+      </div><button class="edbtn" data-ed="applymain">Use this combo</button>`;
+    }
+    const c=s.kind==='custom';
+    const esc=v=>(v==null?'':(''+v)).replace(/"/g,'&quot;');
+    const custom=`<div class="edcustom">
+      <div class="edct">Or drop in your own recipe</div>
+      <input data-edc="name" placeholder="Recipe name" value="${c?esc(s.name):''}">
+      <div class="edrow2">
+        <input data-edc="cal" type="number" inputmode="numeric" placeholder="calories" value="${c?esc(s.cal):''}">
+        <input data-edc="p" type="number" inputmode="numeric" placeholder="protein g" value="${c?esc(s.p):''}">
+      </div>
+      <input data-edc="ing" placeholder="ingredients / notes (optional)" value="${c?esc(s.ing):''}">
+      <button class="edbtn ghost" data-ed="applycustom">Use my recipe</button>
+    </div>`;
+    return `<div class="editor">${swap}${custom}<a class="edcancel" data-ed="cancel">close</a></div>`;
+  }
 
   function renderWeeks(){
     const el=document.getElementById('week');
@@ -692,11 +783,14 @@
         const mult=s.mult!==1?` <span class="pm">${s.mult}&times;</span>`:'';
         const steps=slotSteps(s).map(x=>`<li>${x}</li>`).join('');
         const veto=s.kind==="main"?`<a class="vetomeal" data-key="${s.m.key}">veto this combo</a>`:'';
-        return `<div class="wm">
+        const isEd = editing && editing.wi===wi && editing.si===si;
+        const ed = isEd ? editorHTML(s) : '';
+        return `<div class="wm" data-wi="${wi}" data-si="${si}">
           <div class="wm-h"><span class="sl">${s.label}</span><b>${slotName(s)}</b>${mult}<span class="mm">${s.cal} &middot; ${s.p}g P</span></div>
           <div class="wm-serv"><b>Serving:</b> ${slotServing(s)}</div>
           <ol class="wm-steps">${steps}</ol>
-          <div class="wm-foot"><a class="yt rec" href="${ytLink(slotQuery(s))}" target="_blank" rel="noopener">&#9658; Watch a recipe</a>${veto}</div>
+          <div class="wm-foot"><a class="wm-edit" data-wi="${wi}" data-si="${si}">&#9998; edit / swap</a><a class="yt rec" href="${ytLink(slotQuery(s))}" target="_blank" rel="noopener">&#9658; recipe</a>${veto}</div>
+          ${ed}
         </div>`;
       }).join('');
       const prep=d.slots.map(s=>`<div class="pr"><div><b>${slotName(s)}</b><span class="ig">${slotServing(s)}</span></div><div class="c">&times;7</div></div>`).join('');
@@ -731,6 +825,38 @@
       if(!weeks.length){const d=buildDistinctDay([]); if(d) weeks=[d];}
       renderWeeks(); renderPool(); save();
     }));
+    // open editor
+    el.querySelectorAll('.wm-edit').forEach(b=>b.addEventListener('click',()=>{
+      editing={wi:+b.dataset.wi, si:+b.dataset.si}; renderWeeks();
+    }));
+    // editor actions (only one editor open at a time)
+    if(editing){
+      const card=el.querySelector(`.wm[data-wi="${editing.wi}"][data-si="${editing.si}"]`);
+      const d=weeks[editing.wi]; const s=d&&d.slots[editing.si];
+      if(card && s){
+        const close=()=>{ editing=null; renderWeeks(); };
+        const q=sel=>card.querySelector(sel);
+        const act=name=>card.querySelector(`[data-ed="${name}"]`);
+        const cancelEl=act('cancel'); if(cancelEl) cancelEl.addEventListener('click',close);
+        const am=act('applymain'); if(am) am.addEventListener('click',()=>{
+          const get=k=>card.querySelector(`[data-edk="${k}"]`).value;
+          const fid=get('fid'),pid=get('pid'),cid=get('cid'),vid=get('vid');
+          d.slots[editing.si]={label:s.label,kind:'main',m:{fid,pid,cid,vid,key:fid+'|'+pid+'|'+cid}};
+          recomputeDay(d); editing=null; renderWeeks(); save();
+        });
+        const ap=act('applypick'); if(ap) ap.addEventListener('click',()=>{
+          const id=card.querySelector('[data-ed="pick"]').value;
+          d.slots[editing.si]={label:s.label,kind:(s.label==='Breakfast'?'bf':'cap'),id};
+          recomputeDay(d); editing=null; renderWeeks(); save();
+        });
+        const ac=act('applycustom'); if(ac) ac.addEventListener('click',()=>{
+          const v=k=>card.querySelector(`[data-edc="${k}"]`).value.trim();
+          const name=v('name')||'My Recipe';
+          d.slots[editing.si]={label:s.label,kind:'custom',name,cal:+v('cal')||0,p:+v('p')||0,ing:v('ing'),steps:[]};
+          recomputeDay(d); editing=null; renderWeeks(); save();
+        });
+      }
+    }
     const em=document.getElementById('shopEmail');
     if(em) em.addEventListener('input',()=>{ shopEmail=em.value.trim(); save(); });
     const send=document.getElementById('shopSend');
