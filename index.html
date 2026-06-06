@@ -275,6 +275,13 @@
   .wobtn{font-family:'Bebas Neue';font-size:18px;letter-spacing:.05em;color:#0c0f12;background:var(--acc);border:none;border-radius:9px;padding:8px 18px;cursor:pointer;}
   .wobtn.stop{background:var(--ok);}
   .wonote{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);font-weight:600;margin-left:auto;}
+  .lineupbar{display:flex;align-items:center;gap:11px;margin-bottom:10px;}
+  .shufbtn{font-family:'Bebas Neue';font-size:16px;letter-spacing:.05em;color:var(--acc);background:var(--acc-soft);border:1px solid rgba(255,92,43,.3);border-radius:9px;padding:8px 14px;cursor:pointer;white-space:nowrap;}
+  .shufbtn:active{background:rgba(255,92,43,.22);}
+  .lineupnote{font-size:10.5px;color:var(--mute);font-weight:600;line-height:1.3;letter-spacing:.01em;}
+  .nudge{background:var(--acc-soft);border:1px solid rgba(255,92,43,.3);color:var(--ink);border-radius:11px;padding:10px 13px;margin-bottom:10px;font-size:12.5px;line-height:1.4;}
+  .swapb{flex:0 0 auto;font-size:16px;line-height:1;color:var(--acc);background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:6px 9px;cursor:pointer;}
+  .swapb:active{background:var(--acc-soft);}
   .lograw{display:flex;justify-content:space-between;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:11px 14px;margin-bottom:7px;}
   .lograw .ld{display:flex;flex-direction:column;gap:2px;}
   .lograw .ld em{font-style:normal;font-family:'Barlow Semi Condensed';font-weight:700;font-size:14px;color:var(--acc);letter-spacing:.04em;text-transform:uppercase;}
@@ -326,15 +333,19 @@
 
   <!-- UPPER -->
   <section class="panel on" id="upper">
-    <div class="dayhead"><h2>Upper Day</h2><div class="tag">Circuit &middot; push/pull</div></div>
+    <div class="dayhead"><h2>Upper Day</h2><div class="tag">Circuit &middot; heavy&rarr;light</div></div>
     <div class="wobar"><span class="woclock">0:00</span><button class="wobtn" data-day="Upper">Start</button><span class="wonote">chimes every 30s</span></div>
+    <div class="lineupbar"><button class="shufbtn" data-day="Upper">&#10772; Shuffle</button><span class="lineupnote">Run this lineup 3&ndash;4 weeks, push weight or reps, then shuffle.</span></div>
+    <div class="nudge" id="upperNudge" style="display:none;"></div>
     <ol id="upperList"></ol>
   </section>
 
   <!-- LOWER -->
   <section class="panel" id="lower">
-    <div class="dayhead"><h2>Lower Day</h2><div class="tag">Circuit &middot; squat/hinge</div></div>
+    <div class="dayhead"><h2>Lower Day</h2><div class="tag">Circuit &middot; heavy&rarr;light</div></div>
     <div class="wobar"><span class="woclock">0:00</span><button class="wobtn" data-day="Lower">Start</button><span class="wonote">chimes every 30s</span></div>
+    <div class="lineupbar"><button class="shufbtn" data-day="Lower">&#10772; Shuffle</button><span class="lineupnote">Run this lineup 3&ndash;4 weeks, push weight or reps, then shuffle.</span></div>
+    <div class="nudge" id="lowerNudge" style="display:none;"></div>
     <ol id="lowerList"></ol>
   </section>
 
@@ -355,8 +366,7 @@
       </div>
     </div>
 
-    <p class="note"><b>How a circuit works.</b> Go down the list in order, one move after the next with only 15&ndash;30 seconds between them. That's one round. After the last move, rest 90 sec to 2 min, then repeat. Do 3 rounds to start, build to 4. The moves alternate muscle groups (push/pull upstairs, squat/hinge downstairs) on purpose &mdash; while one muscle works the other recovers, so you keep moving without truly resting.</p>
-    <p class="note"><b>Two of you, lifting together.</b> Share each station: one does the move while the other rests, then trade and move on together. That swap is your built-in rest and keeps the pace honest. Only the bench-tagged move needs the bench, so it's never double-booked &mdash; whoever's not on it starts the next station.</p>
+    <p class="note"><b>How a circuit works.</b> Go down the list in order, one move after the next with only 15&ndash;30 seconds between them. That's one round. After the last move, rest 90 sec to 2 min, then repeat. Do 3 rounds to start, build to 4. The list runs heaviest moves first down to the lightest, so you set the dumbbells once for the heavy block and step down as you go &mdash; less time swapping plates, more time moving.</p>
     <p class="note"><b>Pick weights you can move.</b> A circuit lives or dies on not stopping. Choose a load where the last couple reps are tough but your form holds for the whole round. If you're failing mid-round, it's too heavy for a circuit &mdash; drop it.</p>
     <p class="note"><b>Progress it.</b> When you can finish all 3&ndash;4 rounds at the top of the rep range with clean form, add a round, add reps, or bump 5 lb. Small steps.</p>
     <p class="note"><b>Eating still matters most.</b> For size, eat in a surplus with ~1g protein per lb of bodyweight and sleep 8+ hours. The circuit brings the conditioning and the muscle stimulus; food and sleep build what shows up.</p>
@@ -434,66 +444,118 @@
 </div>
 
 <script>
-  // Exercise data — edit weights/reps here anytime
-  const upper = [
-    {n:"DB Bench Press", pat:"Push", w:"40–55 / hand", r:"10–12", bench:true, yt:"https://www.youtube.com/watch?v=xhEhjF5ozuY"},
-    {n:"Bent-Over DB Row", pat:"Pull", w:"40–60 / hand", r:"10–12", yt:"https://www.youtube.com/watch?v=c-gt-zzoa_A"},
-    {n:"Standing DB Overhead Press", pat:"Push", w:"25–35 / hand", r:"10–12", yt:"https://www.youtube.com/watch?v=tEamOV3hE4U"},
-    {n:"DB Lateral Raise", pat:"Side Delt", w:"10–20 / hand", r:"12–15", yt:"https://www.youtube.com/watch?v=3VcKaXpzqRo"},
-    {n:"DB Shrugs", pat:"Traps", w:"40–60 / hand", r:"12–15", yt:"https://www.youtube.com/watch?v=YJ2q8RkOFVw"},
-    {n:"Overhead DB Triceps Ext.", pat:"Push", w:"30–45 single", r:"12–15", yt:"https://www.youtube.com/watch?v=O7e8j8K3cJo"},
-    {n:"Standing DB Curl", pat:"Pull", w:"20–30 / hand", r:"12–15", yt:"https://www.youtube.com/watch?v=6DeLZ6cbgWQ"},
-    {n:"Plank", pat:"Core", w:"bodyweight", r:"30–45 sec", yt:"https://www.youtube.com/watch?v=BQu26ABuVS0"},
+  // Body-part bank — each day has one slot per body part, ordered heavy→light, with swappable options.
+  const bankUpper = [
+    {part:"Chest", opts:[
+      {n:"DB Bench Press", w:"40–55 / hand", r:"10–12", bench:true, yt:"https://www.youtube.com/watch?v=xhEhjF5ozuY"},
+      {n:"Incline DB Press", w:"30–45 / hand", r:"10–12", bench:true, yt:"https://www.youtube.com/watch?v=sK4Rvug6ufo"},
+    ]},
+    {part:"Back", opts:[
+      {n:"Bent-Over DB Row", w:"40–60 / hand", r:"10–12", yt:"https://www.youtube.com/watch?v=c-gt-zzoa_A"},
+      {n:"Chest-Supported DB Row", w:"30–50 / hand", r:"10–12", bench:true, yt:"https://www.youtube.com/watch?v=XLoIFFXjFyY"},
+      {n:"Single-Arm DB Row", w:"50–70 KB/DB", r:"12 ea", yt:"https://www.youtube.com/watch?v=pYcpY20QaE8"},
+    ]},
+    {part:"Traps", opts:[
+      {n:"DB Shrugs", w:"40–60 / hand", r:"12–15", yt:"https://www.youtube.com/watch?v=YJ2q8RkOFVw"},
+      {n:"DB Upright Row", w:"20–35 / hand", r:"12–15", yt:"https://www.youtube.com/watch?v=CgAdfBs9JfA"},
+    ]},
+    {part:"Shoulders", opts:[
+      {n:"Standing DB Overhead Press", w:"25–35 / hand", r:"10–12", yt:"https://www.youtube.com/watch?v=tEamOV3hE4U"},
+      {n:"Arnold Press", w:"20–30 / hand", r:"10–12", yt:"https://www.youtube.com/watch?v=6Z15_WdXmVw"},
+    ]},
+    {part:"Triceps", opts:[
+      {n:"Overhead DB Triceps Ext.", w:"30–45 single", r:"12–15", yt:"https://www.youtube.com/watch?v=O7e8j8K3cJo"},
+      {n:"DB Skull Crusher", w:"15–25 / hand", r:"12–15", bench:true, yt:"https://www.youtube.com/watch?v=tj81tVq3wLo"},
+    ]},
+    {part:"Biceps", opts:[
+      {n:"Standing DB Curl", w:"20–30 / hand", r:"12–15", yt:"https://www.youtube.com/watch?v=6DeLZ6cbgWQ"},
+      {n:"DB Hammer Curl", w:"20–30 / hand", r:"12–15", yt:"https://www.youtube.com/watch?v=FNvndC4Ov04"},
+    ]},
+    {part:"Side Delts", opts:[
+      {n:"DB Lateral Raise", w:"10–20 / hand", r:"12–15", yt:"https://www.youtube.com/watch?v=3VcKaXpzqRo"},
+      {n:"DB Upright Row", w:"20–35 / hand", r:"12–15", yt:"https://www.youtube.com/watch?v=CgAdfBs9JfA"},
+    ]},
+    {part:"Core", opts:[
+      {n:"Plank", w:"bodyweight", r:"30–45 sec", yt:"https://www.youtube.com/watch?v=BQu26ABuVS0"},
+      {n:"Lying Leg Raise", w:"bodyweight", r:"to fatigue", yt:"https://www.youtube.com/watch?v=sY2ZgV2Sj_s"},
+    ]},
   ];
-  const lower = [
-    {n:"Goblet Squat", pat:"Squat", w:"50–70 KB", r:"12–15", yt:"https://www.youtube.com/watch?v=6mf0oa2GGUc"},
-    {n:"DB Romanian Deadlift", pat:"Hinge", w:"45–60 / hand", r:"12–15", yt:"https://www.youtube.com/watch?v=hQgFixeXdZo"},
-    {n:"DB Bulgarian Split Squat", pat:"Squat", w:"25–40 / hand", r:"10–12 ea", bench:true, yt:"https://www.youtube.com/watch?v=Ozv-OPuVw6A"},
-    {n:"Kettlebell Swing", pat:"Hinge", w:"50–70 KB", r:"15–20", yt:"https://www.youtube.com/watch?v=6cXVxLqTQM8"},
-    {n:"DB Reverse Lunge", pat:"Squat", w:"25–40 / hand", r:"10–12 ea", yt:"https://www.youtube.com/watch?v=MyqQRJ2lW7Q"},
-    {n:"Single-Leg RDL", pat:"Hinge", w:"20–35 / hand", r:"10 ea", yt:"https://www.youtube.com/watch?v=J1ojvq3ftqM"},
-    {n:"Standing DB Calf Raise", pat:"Calves", w:"50–75 / hand", r:"15–20", yt:"https://www.youtube.com/watch?v=H6WptvjXkgw"},
-    {n:"Lying Leg Raise", pat:"Core", w:"bodyweight", r:"to fatigue", yt:"https://www.youtube.com/watch?v=sY2ZgV2Sj_s"},
+  const bankLower = [
+    {part:"Quads · Squat", opts:[
+      {n:"Goblet Squat", w:"50–70 KB", r:"12–15", yt:"https://www.youtube.com/watch?v=6mf0oa2GGUc"},
+      {n:"DB Front Squat", w:"30–50 / hand", r:"10–12", yt:"https://www.youtube.com/watch?v=YF3FAHS2j1M"},
+    ]},
+    {part:"Hamstrings · Hinge", opts:[
+      {n:"DB Romanian Deadlift", w:"45–60 / hand", r:"12–15", yt:"https://www.youtube.com/watch?v=hQgFixeXdZo"},
+      {n:"Single-Leg RDL", w:"20–35 / hand", r:"10 ea", yt:"https://www.youtube.com/watch?v=J1ojvq3ftqM"},
+    ]},
+    {part:"Quads · Unilateral", opts:[
+      {n:"DB Bulgarian Split Squat", w:"25–40 / hand", r:"10–12 ea", bench:true, yt:"https://www.youtube.com/watch?v=Ozv-OPuVw6A"},
+      {n:"DB Reverse Lunge", w:"25–40 / hand", r:"10–12 ea", yt:"https://www.youtube.com/watch?v=MyqQRJ2lW7Q"},
+    ]},
+    {part:"Glutes", opts:[
+      {n:"DB Hip Thrust", w:"40–60", r:"12–15", bench:true, yt:"https://www.youtube.com/watch?v=29OfN4ztW_g"},
+    ]},
+    {part:"Power", opts:[
+      {n:"Kettlebell Swing", w:"50–70 KB", r:"15–20", yt:"https://www.youtube.com/watch?v=6cXVxLqTQM8"},
+    ]},
+    {part:"Calves", opts:[
+      {n:"Standing DB Calf Raise", w:"50–75 / hand", r:"15–20", yt:"https://www.youtube.com/watch?v=H6WptvjXkgw"},
+      {n:"Single-Leg Calf Raise", w:"25–40", r:"15 ea", yt:"https://www.youtube.com/watch?v=1D7s-VyLq0Y"},
+    ]},
+    {part:"Core", opts:[
+      {n:"Lying Leg Raise", w:"bodyweight", r:"to fatigue", yt:"https://www.youtube.com/watch?v=sY2ZgV2Sj_s"},
+      {n:"Plank", w:"bodyweight", r:"30–45 sec", yt:"https://www.youtube.com/watch?v=BQu26ABuVS0"},
+    ]},
   ];
+  const banks = {Upper:bankUpper, Lower:bankLower};
+  let selUpper = bankUpper.map(()=>0);
+  let selLower = bankLower.map(()=>0);
+  const sels = {Upper:selUpper, Lower:selLower};
+  let lineupSince = {Upper:Date.now(), Lower:Date.now()};
+  const NUDGE_MS = 28*24*60*60*1000;
 
-  function render(list, el){
-    document.getElementById(el).innerHTML = list.map(x=>`
-      <li class="ex"><a class="exrow" href="${x.yt}" target="_blank" rel="noopener">
-        <span class="exmid">
-          <span class="exn">${x.n}${x.bench?'<i class="bench">bench</i>':''}</span>
-          <span class="exsub"><em>${x.pat}</em> &middot; ${x.r} &middot; ${x.w}</span>
-        </span>
-        ${x.timer?`<span class="tbtn" role="button" data-sec="${x.timer}">Start ${x.timer}s</span>`:'<span class="explay">&#9658;</span>'}
-      </a></li>`).join('');
-    document.getElementById(el).querySelectorAll('.tbtn').forEach(b=>b.addEventListener('click',e=>{
-      e.preventDefault(); e.stopPropagation(); startTimer(b);
-    }));
-  }
-
-  // ---- plank / interval timer (beep + vibrate at the end) ----
+  // ---- audio (used by the workout-pace chime) ----
   let _actx=null;
   function primeAudio(){ try{ _actx=_actx||new (window.AudioContext||window.webkitAudioContext)(); if(_actx.state==='suspended') _actx.resume(); }catch(e){} }
   function beep(t0,dur,freq){ const o=_actx.createOscillator(),g=_actx.createGain(); o.type='square'; o.frequency.value=freq; o.connect(g); g.connect(_actx.destination); g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(0.35,t0+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur); o.start(t0); o.stop(t0+dur+0.02); }
-  function alarm(){
-    try{ if(navigator.vibrate) navigator.vibrate([500,150,500,150,500,150,500,150,500,150,500,150,500]); }catch(e){}
-    if(_actx){ let t=_actx.currentTime+0.01; for(let i=0;i<16;i++){ beep(t,0.18,i%2?1180:760); t+=0.3; } }   // ~5s of beeps
+
+  function renderDay(dayName){
+    const bank=banks[dayName], sel=sels[dayName], el=document.getElementById(dayName==='Upper'?'upperList':'lowerList');
+    el.innerHTML = bank.map((slot,i)=>{
+      const x=slot.opts[sel[i]%slot.opts.length];
+      const swap = slot.opts.length>1 ? `<button class="swapb" data-day="${dayName}" data-slot="${i}" title="swap movement">&#8644;</button>` : '';
+      return `<li class="ex"><div class="exrow">
+        <span class="exmid">
+          <span class="exn">${x.n}${x.bench?'<i class="bench">bench</i>':''}</span>
+          <span class="exsub"><em>${slot.part}</em> &middot; ${x.r} &middot; ${x.w}</span>
+        </span>
+        ${swap}
+        <a class="explay" href="${x.yt}" target="_blank" rel="noopener" title="form video">&#9658;</a>
+      </div></li>`;
+    }).join('');
+    el.querySelectorAll('.swapb').forEach(b=>b.addEventListener('click',()=>{
+      const d=b.dataset.day, i=+b.dataset.slot, s=sels[d];
+      s[i]=(s[i]+1)%banks[d][i].opts.length;
+      lineupSince[d]=Date.now(); saveWO(); renderDay(d); updateNudge(d);
+    }));
+    updateNudge(dayName);
   }
-  function startTimer(b){
-    if(b.dataset.running) return;
-    primeAudio();                          // unlock audio on this tap (needed on iOS)
-    const total=+b.dataset.sec; let rem=total;
-    b.dataset.running='1'; b.classList.add('run'); b.textContent=rem+'s';
-    const iv=setInterval(()=>{
-      rem--;
-      if(rem<=0){
-        clearInterval(iv); alarm();
-        b.textContent='Done!';
-        setTimeout(()=>{ b.classList.remove('run'); b.textContent='Start '+total+'s'; delete b.dataset.running; },5000);
-      } else { b.textContent=rem+'s'; }
-    },1000);
+  function shuffleDay(dayName){
+    const bank=banks[dayName], s=sels[dayName];
+    bank.forEach((slot,i)=>{ s[i]=Math.floor(Math.random()*slot.opts.length); });
+    lineupSince[dayName]=Date.now(); saveWO(); renderDay(dayName);
   }
-  render(upper,'upperList');
-  render(lower,'lowerList');
+  function updateNudge(dayName){
+    const n=document.getElementById(dayName==='Upper'?'upperNudge':'lowerNudge'); if(!n) return;
+    const due = Date.now()-lineupSince[dayName] > NUDGE_MS;
+    n.style.display = due?'block':'none';
+    if(due) n.innerHTML='You\u2019ve run this lineup ~4 weeks &mdash; tap <b>Shuffle</b> to mix it up.';
+  }
+  function saveWO(){ try{ save(); }catch(e){} }
+  function renderWorkouts(){ renderDay('Upper'); renderDay('Lower'); }
+  document.querySelectorAll('.shufbtn').forEach(b=>b.addEventListener('click',()=>shuffleDay(b.dataset.day)));
+  renderWorkouts();
 
   // ---- MEAL ENGINE: pick proteins + carbs + veggies + styles; blacklist any combo ----
   const proteins = [
@@ -586,6 +648,7 @@
   function save(){
     try{
       const s={goal:curGoal, weeks, blacklist:A(blacklist), shopEmail, workoutLog:woLog, musicSvc,
+        selUpper, selLower, lineupSince,
         proteins:A(proteinsOn), carbs:A(carbsOn), veggies:A(veggiesOn), styles:A(stylesOn), bfs:A(bfOn), caps:A(capOn)};
       ['cw','cg','cft','cin','ca','cact','cgoal'].forEach(id=>{const el=document.getElementById(id); if(el) s[id]=el.value;});
       localStorage.setItem(SAVE_KEY, JSON.stringify(s));
@@ -602,6 +665,9 @@
     shopEmail = s.shopEmail || "";
     woLog = Array.isArray(s.workoutLog) ? s.workoutLog : [];
     musicSvc = s.musicSvc || "youtube";
+    if(Array.isArray(s.selUpper)&&s.selUpper.length===selUpper.length) s.selUpper.forEach((v,i)=>selUpper[i]=v|0);
+    if(Array.isArray(s.selLower)&&s.selLower.length===selLower.length) s.selLower.forEach((v,i)=>selLower[i]=v|0);
+    if(s.lineupSince){ if(s.lineupSince.Upper) lineupSince.Upper=s.lineupSince.Upper; if(s.lineupSince.Lower) lineupSince.Lower=s.lineupSince.Lower; }
     weeks = Array.isArray(s.weeks) ? s.weeks.filter(w=>w&&Array.isArray(w.slots)) : [];
   }
   function buildCatalog(){ /* components are static */ }
@@ -988,6 +1054,7 @@
   applyState(loadState());
   calc();
   renderPool();
+  renderWorkouts();
   if(weeks.length){ document.getElementById('weekHint').style.display='none'; renderWeeks(); }
 
   // ---- WORKOUT TIMER (controlled from Upper/Lower pages) ----
