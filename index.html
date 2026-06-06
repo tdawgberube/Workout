@@ -269,6 +269,18 @@
     font-family:'Bebas Neue';font-size:18px;letter-spacing:.05em;padding:14px;border-radius:14px;cursor:pointer;margin-top:2px;}
   .addweek:active{background:var(--panel-2);}
 
+  /* Workout timer bar (on Upper/Lower) */
+  .wobar{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-bottom:10px;}
+  .woclock{font-family:'Bebas Neue';font-size:30px;letter-spacing:.03em;color:var(--ink);min-width:62px;}
+  .wobtn{font-family:'Bebas Neue';font-size:18px;letter-spacing:.05em;color:#0c0f12;background:var(--acc);border:none;border-radius:9px;padding:8px 18px;cursor:pointer;}
+  .wobtn.stop{background:var(--ok);}
+  .wonote{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);font-weight:600;margin-left:auto;}
+  .lograw{display:flex;justify-content:space-between;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:11px 14px;margin-bottom:7px;}
+  .lograw .ld{display:flex;flex-direction:column;gap:2px;}
+  .lograw .ld em{font-style:normal;font-family:'Barlow Semi Condensed';font-weight:700;font-size:14px;color:var(--acc);letter-spacing:.04em;text-transform:uppercase;}
+  .lograw .ld span{color:var(--mute);font-size:12px;font-weight:600;font-family:'Barlow Semi Condensed';}
+  .lograw b{font-family:'Bebas Neue';font-size:24px;letter-spacing:.03em;color:var(--ink);}
+
   /* Placeholder tabs */
   .soon{
     text-align:center;padding:54px 20px;background:var(--panel);border:1px dashed var(--line);
@@ -301,6 +313,7 @@
     <button class="tab on" data-t="upper">Upper</button>
     <button class="tab" data-t="lower">Lower</button>
     <button class="tab" data-t="how">How To</button>
+    <button class="tab" data-t="timer">Log</button>
     <button class="tab" data-t="meals">Meals</button>
     <button class="tab" data-t="supps">Supps</button>
   </nav>
@@ -308,12 +321,14 @@
   <!-- UPPER -->
   <section class="panel on" id="upper">
     <div class="dayhead"><h2>Upper Day</h2><div class="tag">Circuit &middot; push/pull</div></div>
+    <div class="wobar"><span class="woclock">0:00</span><button class="wobtn" data-day="Upper">Start</button><span class="wonote">chimes every 30s</span></div>
     <ol id="upperList"></ol>
   </section>
 
   <!-- LOWER -->
   <section class="panel" id="lower">
     <div class="dayhead"><h2>Lower Day</h2><div class="tag">Circuit &middot; squat/hinge</div></div>
+    <div class="wobar"><span class="woclock">0:00</span><button class="wobtn" data-day="Lower">Start</button><span class="wonote">chimes every 30s</span></div>
     <ol id="lowerList"></ol>
   </section>
 
@@ -339,6 +354,13 @@
     <p class="note"><b>Pick weights you can move.</b> A circuit lives or dies on not stopping. Choose a load where the last couple reps are tough but your form holds for the whole round. If you're failing mid-round, it's too heavy for a circuit &mdash; drop it.</p>
     <p class="note"><b>Progress it.</b> When you can finish all 3&ndash;4 rounds at the top of the rep range with clean form, add a round, add reps, or bump 5 lb. Small steps.</p>
     <p class="note"><b>Eating still matters most.</b> For size, eat in a surplus with ~1g protein per lb of bodyweight and sleep 8+ hours. The circuit brings the conditioning and the muscle stimulus; food and sleep build what shows up.</p>
+  </section>
+
+  <!-- TIMER / LOG -->
+  <section class="panel" id="timer">
+    <div class="dayhead"><h2>Workout Log</h2><div class="tag"><a class="mini" id="woClear">clear</a></div></div>
+    <p class="note" style="margin-top:0;">Start the timer on the Upper or Lower page. When you hit Stop there, the session lands here with the day and total time.</p>
+    <div id="woLog"></div>
   </section>
 
   <!-- MEALS -->
@@ -406,7 +428,7 @@
     {n:"DB Shrugs", pat:"Traps", w:"40–60 / hand", r:"12–15", yt:"https://www.youtube.com/watch?v=YJ2q8RkOFVw"},
     {n:"Overhead DB Triceps Ext.", pat:"Push", w:"30–45 single", r:"12–15", yt:"https://www.youtube.com/watch?v=O7e8j8K3cJo"},
     {n:"Standing DB Curl", pat:"Pull", w:"20–30 / hand", r:"12–15", yt:"https://www.youtube.com/watch?v=6DeLZ6cbgWQ"},
-    {n:"Plank", pat:"Core", w:"bodyweight", r:"30–45 sec", timer:30, yt:"https://www.youtube.com/watch?v=BQu26ABuVS0"},
+    {n:"Plank", pat:"Core", w:"bodyweight", r:"30–45 sec", yt:"https://www.youtube.com/watch?v=BQu26ABuVS0"},
   ];
   const lower = [
     {n:"Goblet Squat", pat:"Squat", w:"50–70 KB", r:"12–15", yt:"https://www.youtube.com/watch?v=6mf0oa2GGUc"},
@@ -539,13 +561,15 @@
   let showPreview = false;
   let shopEmail = "";
   let editing = null;   // {wi, si} of the meal being edited
+  let woLog = [];       // logged workouts {date, secs}
+  let woRunning=false, woElapsed=0, woIV=null;
 
   // ---- LOCAL SAVE ----
   const SAVE_KEY = 'poolProgram.v3';
   const A = s => [...s];
   function save(){
     try{
-      const s={goal:curGoal, weeks, blacklist:A(blacklist), shopEmail,
+      const s={goal:curGoal, weeks, blacklist:A(blacklist), shopEmail, workoutLog:woLog,
         proteins:A(proteinsOn), carbs:A(carbsOn), veggies:A(veggiesOn), styles:A(stylesOn), bfs:A(bfOn), caps:A(capOn)};
       ['cw','cg','cft','cin','ca','cact','cgoal'].forEach(id=>{const el=document.getElementById(id); if(el) s[id]=el.value;});
       localStorage.setItem(SAVE_KEY, JSON.stringify(s));
@@ -560,6 +584,7 @@
     rest(proteinsOn,s.proteins); rest(carbsOn,s.carbs); rest(veggiesOn,s.veggies); rest(stylesOn,s.styles); rest(bfOn,s.bfs); rest(capOn,s.caps);
     blacklist.clear(); (s.blacklist||[]).forEach(x=>blacklist.add(x));
     shopEmail = s.shopEmail || "";
+    woLog = Array.isArray(s.workoutLog) ? s.workoutLog : [];
     weeks = Array.isArray(s.weeks) ? s.weeks.filter(w=>w&&Array.isArray(w.slots)) : [];
   }
   function buildCatalog(){ /* components are static */ }
@@ -947,6 +972,47 @@
   calc();
   renderPool();
   if(weeks.length){ document.getElementById('weekHint').style.display='none'; renderWeeks(); }
+
+  // ---- WORKOUT TIMER (controlled from Upper/Lower pages) ----
+  let woDay = null;
+  function chime(){
+    try{ if(navigator.vibrate) navigator.vibrate([400,150,400,150,400]); }catch(e){}
+    if(_actx){ let t=_actx.currentTime+0.01; for(let i=0;i<8;i++){ beep(t,0.25,i%2?988:784); t+=0.6; } } // ~5s, two-tone
+  }
+  function woClock(s){ const m=Math.floor(s/60); return m+':'+String(s%60).padStart(2,'0'); }
+  function paintBars(){
+    document.querySelectorAll('.woclock').forEach(c=>c.textContent=woClock(woElapsed));
+    document.querySelectorAll('.wobtn').forEach(b=>{ b.textContent=woRunning?'Stop':'Start'; b.classList.toggle('stop',woRunning); });
+  }
+  function renderLog(){
+    const el=document.getElementById('woLog');
+    if(!el) return;
+    el.innerHTML = woLog.length
+      ? woLog.map(e=>`<div class="lograw"><div class="ld"><em>${e.day||'Workout'}</em><span>${e.date}</span></div><b>${woClock(e.secs)}</b></div>`).join('')
+      : '<p class="cnote">No sessions logged yet. Start the timer on Upper or Lower day.</p>';
+  }
+  function woTick(){
+    woElapsed++;
+    document.querySelectorAll('.woclock').forEach(c=>c.textContent=woClock(woElapsed));
+    if(woElapsed%30===0) chime();
+  }
+  function woToggle(day){
+    if(!woRunning){
+      primeAudio(); woRunning=true; woDay=day; woElapsed=0; paintBars();
+      woIV=setInterval(woTick,1000);
+    } else {
+      woRunning=false; if(woIV){clearInterval(woIV);woIV=null;}
+      if(woElapsed>0){
+        const d=new Date();
+        const stamp=d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+        woLog.unshift({date:stamp, day:woDay||'Workout', secs:woElapsed}); woLog=woLog.slice(0,50); save();
+      }
+      woElapsed=0; woDay=null; paintBars(); renderLog();
+    }
+  }
+  document.querySelectorAll('.wobtn').forEach(b=>b.addEventListener('click',()=>woToggle(b.dataset.day)));
+  const wc=document.getElementById('woClear'); if(wc) wc.addEventListener('click',()=>{ woLog=[]; save(); renderLog(); });
+  paintBars(); renderLog();
 
   // Tabs
   const tabs=document.querySelectorAll('.tab');
