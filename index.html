@@ -57,19 +57,26 @@
   .rule small{display:block;color:var(--mute);font-size:9px;margin-top:3px;text-transform:uppercase;letter-spacing:.04em;font-weight:600;line-height:1.2;}
 
   /* Tabs */
-  nav{
-    position:sticky;top:0;z-index:20;margin:18px -16px 16px;padding:10px 16px;
-    background:linear-gradient(var(--bg) 70%, rgba(12,15,18,0));
-    display:flex;flex-wrap:wrap;justify-content:center;gap:7px;
+  .navwrap{
+    position:sticky;top:0;z-index:20;margin:18px -16px 14px;padding:10px 16px 11px;
+    background:linear-gradient(var(--bg) 78%, rgba(12,15,18,0));
   }
-  nav::-webkit-scrollbar{display:none;}
+  #topnav,#subnav{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;}
+  #subnav{margin-top:8px;}
+  #subnav:empty{display:none;}
+  .ptab{
+    flex:0 0 auto;font-family:'Bebas Neue';font-size:19px;letter-spacing:.06em;
+    color:var(--mute);background:var(--panel);border:1px solid var(--line);
+    padding:8px 24px;border-radius:999px;cursor:pointer;transition:.18s;
+  }
+  .ptab.on{color:#fff;background:var(--acc);border-color:var(--acc);box-shadow:0 6px 18px -8px var(--acc);}
   .tab{
     flex:0 0 auto;font-family:'Barlow Semi Condensed';font-weight:700;letter-spacing:.04em;
     text-transform:uppercase;font-size:12.5px;color:var(--mute);
     background:var(--panel);border:1px solid var(--line);
-    padding:8px 13px;border-radius:999px;cursor:pointer;transition:.18s;white-space:nowrap;
+    padding:7px 14px;border-radius:999px;cursor:pointer;transition:.18s;white-space:nowrap;
   }
-  .tab.on{color:#fff;background:var(--acc);border-color:var(--acc);box-shadow:0 6px 18px -8px var(--acc);}
+  .tab.on{color:var(--acc);background:var(--acc-soft);border-color:rgba(255,92,43,.45);}
 
   /* Panels */
   .panel{display:none;animation:rise .32s ease both;}
@@ -319,15 +326,14 @@
     </div>
   </header>
 
-  <nav id="tabs">
-    <button class="tab on" data-t="upper">Upper</button>
-    <button class="tab" data-t="lower">Lower</button>
-    <button class="tab" data-t="how">How To</button>
-    <button class="tab" data-t="timer">Log</button>
-    <button class="tab" data-t="music">Music</button>
-    <button class="tab" data-t="meals">Meals</button>
-    <button class="tab" data-t="supps">Supps</button>
-  </nav>
+  <div class="navwrap">
+    <nav id="topnav">
+      <button class="ptab on" data-g="Train">Train</button>
+      <button class="ptab" data-g="Eat">Eat</button>
+      <button class="ptab" data-g="More">More</button>
+    </nav>
+    <nav id="subnav"></nav>
+  </div>
 
   <!-- UPPER -->
   <section class="panel on" id="upper">
@@ -1112,15 +1118,39 @@
   }
   renderMusic();
 
-  // Tabs
-  const tabs=document.querySelectorAll('.tab');
-  tabs.forEach(t=>t.addEventListener('click',()=>{
-    tabs.forEach(x=>x.classList.remove('on'));
-    t.classList.add('on');
+  // Two-level tabs: primary group → sub-tabs
+  const navGroups = {
+    Train: [['upper','Upper'],['lower','Lower'],['timer','Log'],['music','Music']],
+    Eat:   [['meals','Meals'],['supps','Supplements']],
+    More:  [['how','How To']],
+  };
+  let activeGroup='Train', activePanel='upper';
+  function showPanel(id){
     document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
-    document.getElementById(t.dataset.t).classList.add('on');
+    const el=document.getElementById(id); if(el) el.classList.add('on');
+    activePanel=id;
+    document.querySelectorAll('#subnav .tab').forEach(b=>b.classList.toggle('on', b.dataset.t===id));
     window.scrollTo({top:0,behavior:'smooth'});
-  }));
+  }
+  function renderSub(){
+    const sub=document.getElementById('subnav');
+    const items=navGroups[activeGroup];
+    sub.innerHTML = items.length>1
+      ? items.map(([t,label])=>`<button class="tab ${t===activePanel?'on':''}" data-t="${t}">${label}</button>`).join('')
+      : '';
+    sub.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>showPanel(b.dataset.t)));
+  }
+  function selectGroup(g){
+    activeGroup=g;
+    document.querySelectorAll('#topnav .ptab').forEach(b=>b.classList.toggle('on', b.dataset.g===g));
+    const ids=navGroups[g].map(x=>x[0]);
+    if(!ids.includes(activePanel)) activePanel=ids[0];
+    renderSub();
+    showPanel(activePanel);
+  }
+  document.querySelectorAll('#topnav .ptab').forEach(b=>b.addEventListener('click',()=>selectGroup(b.dataset.g)));
+  selectGroup('Train');
+
 </script>
 </body>
 </html>
