@@ -47,14 +47,14 @@
 
   /* Principles strip */
   .rules{
-    margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:8px;
+    margin-top:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;
   }
   .rule{
-    background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:11px 12px;
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 7px;text-align:center;
   }
-  .rule b{font-family:'Bebas Neue';font-size:21px;letter-spacing:.02em;display:block;color:var(--ink);line-height:1;}
+  .rule b{font-family:'Bebas Neue';font-size:19px;letter-spacing:.02em;display:block;color:var(--ink);line-height:1;}
   .rule b em{color:var(--acc);font-style:normal;}
-  .rule small{display:block;color:var(--mute);font-size:11px;margin-top:3px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+  .rule small{display:block;color:var(--mute);font-size:9px;margin-top:3px;text-transform:uppercase;letter-spacing:.04em;font-weight:600;line-height:1.2;}
 
   /* Tabs */
   nav{
@@ -80,35 +80,16 @@
   .dayhead h2{font-family:'Bebas Neue';font-size:34px;letter-spacing:.02em;}
   .dayhead .tag{font-family:'Barlow Semi Condensed';font-weight:600;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);}
 
-  ol{list-style:none;display:flex;flex-direction:column;gap:9px;counter-reset:ex;}
-  li.ex{
-    counter-increment:ex;background:var(--panel);border:1px solid var(--line);
-    border-radius:16px;padding:13px 14px 13px 14px;position:relative;overflow:hidden;
-  }
-  li.ex::before{
-    content:counter(ex,decimal-leading-zero);
-    font-family:'Bebas Neue';font-size:13px;color:var(--acc);
-    position:absolute;top:11px;right:14px;letter-spacing:.1em;opacity:.8;
-  }
-  .ex .name{font-family:'Barlow Semi Condensed';font-weight:700;font-size:17px;letter-spacing:.005em;padding-right:34px;}
-  .ex .name .bench{
-    display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
-    color:var(--acc);background:var(--acc-soft);border:1px solid rgba(255,92,43,.35);
-    padding:2px 6px;border-radius:6px;margin-left:6px;vertical-align:middle;
-  }
-  .ex .meta{display:flex;gap:14px;margin-top:7px;flex-wrap:wrap;}
-  .ex .meta div{line-height:1;}
-  .ex .meta span{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);font-weight:600;margin-bottom:3px;}
-  .ex .meta strong{font-family:'Barlow Semi Condensed';font-weight:700;font-size:15px;color:var(--ink);}
-  .ex .meta strong em{font-style:normal;color:var(--acc);}
-  .ex .yt{
-    display:inline-flex;align-items:center;gap:6px;margin-top:11px;
-    font-family:'Barlow Semi Condensed';font-weight:700;font-size:12px;letter-spacing:.06em;
-    text-transform:uppercase;color:var(--acc);text-decoration:none;
-    background:var(--acc-soft);border:1px solid rgba(255,92,43,.3);
-    padding:6px 11px;border-radius:9px;transition:.15s;
-  }
-  .ex .yt:active{background:rgba(255,92,43,.28);}
+  ol{list-style:none;display:flex;flex-direction:column;gap:6px;counter-reset:ex;}
+  li.ex{counter-increment:ex;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;}
+  .exrow{display:flex;align-items:center;gap:11px;padding:7px 13px;text-decoration:none;color:var(--ink);}
+  .exrow::before{content:counter(ex,decimal-leading-zero);font-family:'Bebas Neue';font-size:14px;color:var(--acc);letter-spacing:.05em;opacity:.85;min-width:20px;}
+  .exmid{flex:1;min-width:0;}
+  .exn{display:block;font-family:'Barlow Semi Condensed';font-weight:700;font-size:14.5px;letter-spacing:.01em;line-height:1.15;}
+  .exn .bench{font-style:normal;font-size:8.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--acc);background:var(--acc-soft);border:1px solid rgba(255,92,43,.35);padding:1px 5px;border-radius:5px;margin-left:6px;vertical-align:middle;}
+  .exsub{display:block;font-size:11px;color:var(--mute);margin-top:1px;font-family:'Barlow Semi Condensed';font-weight:600;letter-spacing:.02em;}
+  .exsub em{font-style:normal;color:var(--acc);}
+  .explay{color:var(--acc);font-size:13px;flex:0 0 auto;}
 
   /* Schedule */
   .sched{margin-top:16px;background:var(--panel-2);border:1px solid var(--line);border-radius:16px;padding:14px;}
@@ -426,15 +407,13 @@
 
   function render(list, el){
     document.getElementById(el).innerHTML = list.map(x=>`
-      <li class="ex">
-        <div class="name">${x.n}${x.bench?'<span class="bench">Bench</span>':''}</div>
-        <div class="meta">
-          <div><span>Move</span><strong><em>${x.pat}</em></strong></div>
-          <div><span>Reps</span><strong>${x.r}</strong></div>
-          <div><span>Weight</span><strong>${x.w}</strong></div>
-        </div>
-        <a class="yt" href="${x.yt}" target="_blank" rel="noopener">&#9658; Watch the form</a>
-      </li>`).join('');
+      <li class="ex"><a class="exrow" href="${x.yt}" target="_blank" rel="noopener">
+        <span class="exmid">
+          <span class="exn">${x.n}${x.bench?'<i class="bench">bench</i>':''}</span>
+          <span class="exsub"><em>${x.pat}</em> &middot; ${x.r} &middot; ${x.w}</span>
+        </span>
+        <span class="explay">&#9658;</span>
+      </a></li>`).join('');
   }
   render(upper,'upperList');
   render(lower,'lowerList');
