@@ -404,6 +404,7 @@
         <label>Goal weight (lb)<select id="cg"></select></label>
         <label>Height<div class="ht"><select id="cft"></select><select id="cin"></select></div></label>
         <label>Age<select id="ca"></select></label>
+        <label>Sex<select id="csex"><option value="m" selected>Male</option><option value="f">Female</option></select></label>
       </div>
       <div class="cgrid2">
         <label>Activity
@@ -422,7 +423,7 @@
         </label>
       </div>
       <div class="cout" id="cout"></div>
-      <p class="cnote">Calories from Mifflin&ndash;St Jeor &times; activity, adjusted for goal. Protein at ~1g per lb of goal weight. These are starting points &mdash; if the scale isn't moving the right way after 2&ndash;3 weeks, adjust calories by ~200.</p>
+      <p class="cnote">Calories from Mifflin&ndash;St Jeor (your sex, height, weight, age) &times; activity, adjusted for goal. Protein at ~1g per lb of goal weight. These are starting points &mdash; if the scale isn't moving the right way after 2&ndash;3 weeks, adjust calories by ~200.</p>
     </div>
 
     <!-- FOODS POOL -->
@@ -438,6 +439,8 @@
   </section>
 
   <!-- SUPPS -->
+  <section class="panel" id="recipes"></section>
+
   <section class="panel" id="supps">
     <div class="dayhead"><h2>Supplements</h2><div class="tag">Daily &middot; the basics</div></div>
     <ol id="suppList"></ol>
@@ -639,7 +642,7 @@
       const s={goal:curGoal, weeks, blacklist:A(blacklist), shopEmail, workoutLog:woLog, musicSvc,
         selUpper, selLower,
         proteins:A(proteinsOn), carbs:A(carbsOn), veggies:A(veggiesOn), styles:A(stylesOn), bfs:A(bfOn), caps:A(capOn)};
-      ['cw','cg','cft','cin','ca','cact','cgoal'].forEach(id=>{const el=document.getElementById(id); if(el) s[id]=el.value;});
+      ['cw','cg','cft','cin','ca','csex','cact','cgoal'].forEach(id=>{const el=document.getElementById(id); if(el) s[id]=el.value;});
       localStorage.setItem(SAVE_KEY, JSON.stringify(s));
     }catch(e){}
   }
@@ -647,7 +650,7 @@
   function rest(set,arr){ if(Array.isArray(arr)&&arr.length){ set.clear(); arr.forEach(x=>set.add(x)); } }
   function applyState(s){
     if(!s) return;
-    ['cw','cg','cft','cin','ca','cact','cgoal'].forEach(id=>{const el=document.getElementById(id); if(el&&s[id]!=null) el.value=s[id];});
+    ['cw','cg','cft','cin','ca','csex','cact','cgoal'].forEach(id=>{const el=document.getElementById(id); if(el&&s[id]!=null) el.value=s[id];});
     curGoal = s.goal || (document.getElementById('cgoal')||{}).value || 'bulk';
     rest(proteinsOn,s.proteins); rest(carbsOn,s.carbs); rest(veggiesOn,s.veggies); rest(stylesOn,s.styles); rest(bfOn,s.bfs); rest(capOn,s.caps);
     blacklist.clear(); (s.blacklist||[]).forEach(x=>blacklist.add(x));
@@ -806,6 +809,17 @@
     if(o.unit==='') return `${o.item}: ${q}`;
     return `${o.item}: ${q} ${o.unit}`;
   }
+  function buildRecipesText(d){
+    let t=`THIS WEEK'S RECIPES\nTarget: ${target.cal} cal / ${target.pro}g protein per day\n\n`;
+    d.slots.forEach(s=>{
+      const mult = (s.kind==='main' && s.mult!==1) ? ` (${s.mult}x portion)` : '';
+      t += `[${s.label.toUpperCase()}] ${slotName(s)}${mult}\n`;
+      t += `Serving: ${slotServing(s)}\n`;
+      slotSteps(s).forEach((x,i)=>{ t += `  ${i+1}. ${x}\n`; });
+      t += '\n';
+    });
+    return t;
+  }
   function buildShoppingText(d){
     const prot={},carb={},veg={},pantry=new Set(),bfn=[];
     d.slots.forEach(s=>{
@@ -909,7 +923,8 @@
           <button class="shopbtn" id="shopSend">Email it</button>
         </div>
         <button class="shopbtn ghost" id="shopCopy">Copy list</button>
-        <p class="cnote">&ldquo;Email it&rdquo; opens your mail app with the list and address filled in &mdash; just hit send. Built from Week 1.</p>
+        <button class="shopbtn ghost" id="recSend">Email recipes</button>
+        <p class="cnote">The buttons open your mail app pre-filled &mdash; just hit send. &ldquo;Email it&rdquo; sends the shopping list; &ldquo;Email recipes&rdquo; sends each meal with steps. Built from Week 1.</p>
       </div>`;
     }
     el.innerHTML=html;
@@ -968,6 +983,13 @@
       try{ await navigator.clipboard.writeText(txt); cp.textContent='Copied!'; setTimeout(()=>cp.textContent='Copy list',1500); }
       catch(e){ const t=document.getElementById('shopText'); const r=document.createRange(); r.selectNodeContents(t); const sel=getSelection(); sel.removeAllRanges(); sel.addRange(r); cp.textContent='Selected — copy it'; setTimeout(()=>cp.textContent='Copy list',1800); }
     });
+    const rs=document.getElementById('recSend');
+    if(rs) rs.addEventListener('click',()=>{
+      const txt=buildRecipesText(weeks[0]);
+      const to=encodeURIComponent((document.getElementById('shopEmail')||{}).value||'');
+      const sub=encodeURIComponent("Pool Program — This Week's Recipes");
+      window.location.href=`mailto:${to}?subject=${sub}&body=${encodeURIComponent(txt)}`;
+    });
   }
   function generateWeek(){
     document.getElementById('weekHint').style.display='none';
@@ -1001,12 +1023,13 @@
     const a=+document.getElementById('ca').value||0;
     const act=+document.getElementById('cact').value;
     const goal=document.getElementById('cgoal').value;
+    const sex=(document.getElementById('csex')||{}).value||'m';
     const kg=w*0.4536, cm=h*2.54;
-    const bmr = 10*kg + 6.25*cm - 5*a + 5;       // male
+    const bmr = 10*kg + 6.25*cm - 5*a + (sex==='f'? -161 : 5);   // Mifflin–St Jeor (sex-specific)
     const tdee = bmr*act;
     let cals = tdee;
     if(goal==='bulk') cals = tdee+400;
-    if(goal==='cut')  cals = tdee-500;
+    if(goal==='cut')  cals = Math.max(tdee-1000, 1200);   // ~2 lb/week, floored for safety
     cals = Math.round(cals/10)*10;
     const protein = Math.round(goal==='cut'? w : g);
     target={cal:cals,pro:protein};
@@ -1036,7 +1059,7 @@
     fillOpts('cin',0,11,1,10,' in');
     fillOpts('ca',13,80,1,18);
   }
-  ['cw','cg','cft','cin','ca','cact','cgoal'].forEach(id=>{
+  ['cw','cg','cft','cin','ca','csex','cact','cgoal'].forEach(id=>{
     const el=document.getElementById(id);
     el.addEventListener('input',calc);
     el.addEventListener('change',calc);
@@ -1118,10 +1141,35 @@
   }
   renderMusic();
 
+  // ---- RECIPES BROWSER (pick a protein, see its dishes) ----
+  let recipeProt = 'chk';
+  function renderRecipes(){
+    const wrap=document.getElementById('recipes'); if(!wrap) return;
+    const pr=protById[recipeProt];
+    const chips=proteins.map(p=>`<button class="chip ${p.id===recipeProt?'on':''}" data-rp="${p.id}">${p.short}</button>`).join('');
+    const dishes=styles.filter(s=>s.proteins.includes(recipeProt)).map(s=>{
+      const carbList=s.carbs.map(c=>carbById[c].short).join(' &middot; ');
+      const steps=s.steps.map(x=>`<li>${x.replace(/\{p\}/g,pr.short.toLowerCase()).replace(/\{c\}/g,'your carb').replace(/\{v\}/g,'your veggie')}</li>`).join('');
+      return `<div class="wm">
+        <div class="wm-h"><b>${s.name} ${pr.short}</b></div>
+        <div class="wm-serv"><b>Base:</b> ${pr.qty} ${pr.unit?pr.unit+' ':''}${pr.item}, ${s.sauce}, your veggie</div>
+        <div class="wm-serv"><b>Carbs that fit:</b> ${carbList}</div>
+        <ol class="wm-steps">${steps}</ol>
+        <div class="wm-foot"><a class="yt rec" href="${ytLink(s.name+' '+pr.short)}" target="_blank" rel="noopener">&#9658; recipe</a></div>
+      </div>`;
+    }).join('');
+    wrap.innerHTML=`<div class="dayhead"><h2>Recipes</h2><div class="tag">Pick a protein</div></div>
+      <div class="chips">${chips}</div>
+      <p class="note" style="margin-top:0;">Every dish ${pr.short} works in &mdash; build any of them with whatever carb and veggie you pick.</p>
+      <div class="recipelist">${dishes}</div>`;
+    wrap.querySelectorAll('[data-rp]').forEach(b=>b.addEventListener('click',()=>{ recipeProt=b.dataset.rp; renderRecipes(); }));
+  }
+  renderRecipes();
+
   // Two-level tabs: primary group → sub-tabs
   const navGroups = {
     Train: [['upper','Upper'],['lower','Lower'],['timer','Log'],['music','Music']],
-    Eat:   [['meals','Meals'],['supps','Supplements']],
+    Eat:   [['meals','Meals'],['recipes','Recipes'],['supps','Supplements']],
     More:  [['how','How To']],
   };
   let activeGroup='Train', activePanel='upper';
