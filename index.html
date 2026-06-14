@@ -110,6 +110,11 @@
   .week .d.U{background:var(--acc-soft);border-color:rgba(255,92,43,.4);}
   .week .d.U b{color:var(--acc);}
   .week .d.L{background:rgba(61,220,132,.1);border-color:rgba(61,220,132,.35);}
+  .srow{display:flex;gap:12px;align-items:baseline;padding:9px 0;border-top:1px solid var(--line);}
+  .srow:first-of-type{border-top:none;}
+  .sfreq{flex:0 0 110px;font-family:'Bebas Neue';font-size:16px;letter-spacing:.03em;color:var(--acc);line-height:1.1;}
+  .swhat{font-size:13px;color:var(--ink);line-height:1.4;}
+  .swhat b{color:var(--ink);}
   .week .d.L b{color:var(--ok);}
 
   .note{color:var(--mute);font-size:12.5px;line-height:1.5;margin-top:14px;padding:0 2px;}
@@ -323,7 +328,7 @@
     <h1>BUILT<span>.</span></h1>
     <div class="sub">Upper / Lower hypertrophy &middot; one bench, two lifters</div>
 
-    <div class="rules">
+    <div class="rules" id="rulesStrip">
       <div class="rule"><b>2<em>/2</em></b><small>On / off cycle</small></div>
       <div class="rule"><b>3&ndash;4<em>rds</em></b><small>Rounds / session</small></div>
       <div class="rule"><b>15&ndash;30<em>s</em></b><small>Rest between moves</small></div>
@@ -364,7 +369,7 @@
   <section class="panel" id="how">
     <div class="dayhead"><h2>How To Run It</h2><div class="tag">Read once</div></div>
 
-    <div class="sched">
+    <div class="sched" id="schedHeavy">
       <h3>The Cycle &mdash; 2 On, 2 Off</h3>
       <div class="week">
         <div class="d U"><small>Day 1</small><b>UPPER</b></div>
@@ -373,6 +378,13 @@
         <div class="d"><small>Day 4</small><b>OFF</b></div>
       </div>
       <p class="s" style="margin-top:9px;">Train two days, rest two, then start over &mdash; the cycle rolls forward no matter what day of the week it lands on. That's about 3&ndash;4 sessions a week with two full recovery days each round.</p>
+    </div>
+    <div class="sched" id="schedSenior" style="display:none;">
+      <h3>The Rhythm &mdash; Gentle &amp; Often</h3>
+      <div class="srow"><span class="sfreq">Every other day</span><span class="swhat"><b>Strength</b> &mdash; the leg &amp; upper moves (about 3&times; a week)</span></div>
+      <div class="srow"><span class="sfreq">Every day</span><span class="swhat"><b>Balance</b> &mdash; one-foot stand, heel-to-toe (a few minutes)</span></div>
+      <div class="srow"><span class="sfreq">Most days</span><span class="swhat"><b>Walk</b> &mdash; easy pace, working toward ~150 min a week</span></div>
+      <p class="s" style="margin-top:9px;">No heavy weight means no long recovery needed, so the goal flips: gentle, but often. Strength on alternating days, balance daily (that's where falls are prevented), and walk when you can. Start small and build up &mdash; doing some is far better than none. Get a doctor or PT to clear it first.</p>
     </div>
 
     <p class="note"><b>How a circuit works.</b> Go down the list in order, one move after the next with only 15&ndash;30 seconds between them. That's one round. After the last move, rest 90 sec to 2 min, then repeat. Do 3 rounds to start, build to 4. The list runs heaviest moves first down to the lightest, so you set the dumbbells once for the heavy block and step down as you go &mdash; less time swapping plates, more time moving.</p>
@@ -414,9 +426,10 @@
       <div class="cgrid2">
         <label>Activity
           <select id="cact">
-            <option value="1.375">Light (3–4 lifts/wk)</option>
-            <option value="1.55" selected>Moderate (4–5/wk)</option>
-            <option value="1.725">Hard (6+/wk + active)</option>
+            <option value="1.2">Sedentary — desk, little walking</option>
+            <option value="1.375">Light — on your feet some</option>
+            <option value="1.55" selected>Moderate — active most days</option>
+            <option value="1.725">Hard — very active, on feet all day</option>
           </select>
         </label>
         <label>Goal
@@ -428,7 +441,8 @@
         </label>
       </div>
       <div class="cout" id="cout"></div>
-      <p class="cnote">Calories from Mifflin&ndash;St Jeor (your sex, height, weight, age) &times; activity, adjusted for goal. Protein at ~1g per lb of goal weight. These are starting points &mdash; if the scale isn't moving the right way after 2&ndash;3 weeks, adjust calories by ~200.</p>
+      <p class="cnote" id="actHint" style="display:none;"></p>
+      <p class="cnote">Pick activity by your <b>whole day</b>, not your workout &mdash; a few short sessions barely move it. Calories from Mifflin&ndash;St Jeor (your sex, height, weight, age) &times; activity, adjusted for goal. Protein at ~1g per lb of goal weight. These are starting points &mdash; if the scale isn't moving the right way after 2&ndash;3 weeks, adjust calories by ~200.</p>
     </div>
 
     <!-- FOODS POOL -->
@@ -596,6 +610,21 @@
   }
   function saveWO(){ try{ save(); }catch(e){} }
   function renderWorkouts(){ renderDay('Upper'); renderDay('Lower'); }
+  function applyAgeUI(){
+    const senior = userAge()>70;
+    const sh=document.getElementById('schedHeavy'), ss=document.getElementById('schedSenior');
+    if(sh&&ss){ sh.style.display=senior?'none':''; ss.style.display=senior?'':'none'; }
+    const rs=document.getElementById('rulesStrip');
+    if(rs) rs.innerHTML = senior
+      ? '<div class="rule"><b>3<em>&times;</em></b><small>Strength / week</small></div>'
+       +'<div class="rule"><b>Daily</b><small>Balance work</small></div>'
+       +'<div class="rule"><b>Most</b><small>Days walking</small></div>'
+       +'<div class="rule"><b>7&ndash;8<em>h</em></b><small>Sleep &amp; protein</small></div>'
+      : '<div class="rule"><b>2<em>/2</em></b><small>On / off cycle</small></div>'
+       +'<div class="rule"><b>3&ndash;4<em>rds</em></b><small>Rounds / session</small></div>'
+       +'<div class="rule"><b>15&ndash;30<em>s</em></b><small>Rest between moves</small></div>'
+       +'<div class="rule"><b>8<em>h</em>+</b><small>Sleep &amp; eat big</small></div>';
+  }
   renderWorkouts();
 
   // ---- MEAL ENGINE: pick proteins + carbs + veggies + styles; blacklist any combo ----
@@ -1106,11 +1135,14 @@
     const kg=w*0.4536, cm=h*2.54;
     const bmr = 10*kg + 6.25*cm - 5*a + (sex==='f'? -161 : 5);   // Mifflin–St Jeor (sex-specific)
     const tdee = bmr*act;
+    const senior = a>70;
     let cals = tdee;
     if(goal==='bulk') cals = tdee+400;
-    if(goal==='cut')  cals = Math.max(tdee-1000, 1200);   // ~2 lb/week, floored for safety
+    if(goal==='cut')  cals = senior ? Math.max(tdee-300, 1200)    // gentle ~0.5 lb/week for older adults
+                                    : Math.max(tdee-1000, 1200);  // ~2 lb/week
     cals = Math.round(cals/10)*10;
-    const protein = Math.round(goal==='cut'? w : g);
+    const protein = senior ? Math.round(kg*1.2)                   // ESPEN/PROT-AGE: 1.0–1.2 g/kg for older adults
+                           : Math.round(goal==='cut'? w : g);     // ~1 g/lb otherwise
     target={cal:cals,pro:protein};
     const goalChanged = goal!==curGoal;
     curGoal = goal;
@@ -1124,6 +1156,12 @@
       document.getElementById('weekHint').style.display='block';
     }
     if(typeof renderWorkouts==='function') renderWorkouts();   // age may flip the gentle 70+ plan on/off
+    if(typeof applyAgeUI==='function') applyAgeUI();           // swap schedule + header stats for 70+
+    const ah=document.getElementById('actHint');
+    if(ah){
+      if(a>70){ ah.style.display='block'; ah.innerHTML='<b>Eating for 70+ (muscle-keeping, not crash-dieting).</b> Protein matters most: aim for about '+protein+'g a day (~1.2g per kg), split across all three meals &mdash; older muscle needs a bigger dose per meal, and a protein-rich breakfast counts double. Go easy on weight loss; this uses a gentle ~½ lb/week deficit because fast loss strips muscle and bone at this age. Drink water through the day (thirst fades with age), and watch vitamin D, calcium, and B12 &mdash; ask a doctor about levels and supplements before starting.'; }
+      else ah.style.display='none';
+    }
     save();
   }
   // populate the dropdowns (faster than typing on a phone)
@@ -1150,6 +1188,7 @@
   calc();
   renderPool();
   renderWorkouts();
+  applyAgeUI();
   setMealScope(mealScope);
   if(weeks.length){ document.getElementById('weekHint').style.display='none'; renderWeeks(); }
 
