@@ -103,7 +103,7 @@
   /* Schedule */
   .sched{margin-top:16px;background:var(--panel-2);border:1px solid var(--line);border-radius:16px;padding:14px;}
   .sched h3{font-family:'Bebas Neue';font-size:20px;letter-spacing:.03em;margin-bottom:9px;}
-  .week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+  .week{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
   .week .d{text-align:center;border-radius:10px;padding:8px 2px;border:1px solid var(--line);background:var(--panel);}
   .week .d small{display:block;font-size:9px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em;font-weight:600;}
   .week .d b{font-family:'Barlow Semi Condensed';font-weight:700;font-size:12px;letter-spacing:.03em;display:block;margin-top:3px;}
@@ -233,6 +233,9 @@
   .wm-steps li{font-size:12.5px;line-height:1.4;color:var(--mute);}
   .wm .yt.rec{margin-top:10px;}
   .wm-foot{display:flex;align-items:center;gap:14px;margin-top:10px;flex-wrap:wrap;}
+  .wm-lock{color:var(--mute);font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
+  .wm-lock.on{color:var(--ok);}
+  .wm.locked{background:rgba(60,200,120,.06);border-radius:10px;padding:8px 10px;margin:0 -10px;}
   .wm-foot .yt.rec{margin-top:0;}
   .vetomeal{color:var(--mute);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;border-bottom:1px dashed var(--mute);}
   .vetomeal:active{color:var(--acc);}
@@ -283,6 +286,8 @@
   .wobtn.stop{background:var(--ok);}
   .wonote{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);font-weight:600;margin-left:auto;}
   .lineupnote{display:block;font-size:11px;color:var(--mute);font-weight:600;line-height:1.4;letter-spacing:.01em;margin:-2px 0 11px;}
+  .snote{background:var(--acc-soft);border:1px solid rgba(255,92,43,.3);color:var(--ink);border-radius:11px;padding:11px 14px;margin:0 0 11px;font-size:12.5px;line-height:1.45;}
+  .snote b{color:var(--acc);}
   .swapb{flex:0 0 auto;font-size:16px;line-height:1;color:var(--acc);background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:6px 9px;cursor:pointer;}
   .swapb:active{background:var(--acc-soft);}
   .lograw{display:flex;justify-content:space-between;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:11px 14px;margin-bottom:7px;}
@@ -319,7 +324,7 @@
     <div class="sub">Upper / Lower hypertrophy &middot; one bench, two lifters</div>
 
     <div class="rules">
-      <div class="rule"><b>4<em>&times;</em></b><small>Days / week</small></div>
+      <div class="rule"><b>2<em>/2</em></b><small>On / off cycle</small></div>
       <div class="rule"><b>3&ndash;4<em>rds</em></b><small>Rounds / session</small></div>
       <div class="rule"><b>15&ndash;30<em>s</em></b><small>Rest between moves</small></div>
       <div class="rule"><b>8<em>h</em>+</b><small>Sleep &amp; eat big</small></div>
@@ -340,7 +345,8 @@
     <div class="dayhead"><h2>Upper Day</h2><div class="tag">Circuit &middot; heavy&rarr;light</div></div>
     <div class="wobar"><span class="woclock">0:00</span><button class="wobtn" data-day="Upper">Start</button><span class="wonote">chimes every 30s</span></div>
     <p class="lineupnote">The 30s chime is a pacing nudge so you don't rest too long mid-circuit &mdash; not a cue to change moves. Go at your own tempo, hold planks as long as you want, then rest 1&ndash;2 min between full circuits.</p>
-    <p class="lineupnote">Tap &#8644; on any move to swap it. Run a lineup 3&ndash;4 weeks, push weight or reps, then swap in new ones.</p>
+    <p class="lineupnote" id="upperSwapNote">Tap &#8644; on any move to swap it. Run a lineup 3&ndash;4 weeks, push weight or reps, then swap in new ones.</p>
+    <div class="snote" id="upperSnote" style="display:none;"></div>
     <ol id="upperList"></ol>
   </section>
 
@@ -349,7 +355,8 @@
     <div class="dayhead"><h2>Lower Day</h2><div class="tag">Circuit &middot; heavy&rarr;light</div></div>
     <div class="wobar"><span class="woclock">0:00</span><button class="wobtn" data-day="Lower">Start</button><span class="wonote">chimes every 30s</span></div>
     <p class="lineupnote">The 30s chime is a pacing nudge so you don't rest too long mid-circuit &mdash; not a cue to change moves. Go at your own tempo, then rest 1&ndash;2 min between full circuits.</p>
-    <p class="lineupnote">Tap &#8644; on any move to swap it. Run a lineup 3&ndash;4 weeks, push weight or reps, then swap in new ones.</p>
+    <p class="lineupnote" id="lowerSwapNote">Tap &#8644; on any move to swap it. Run a lineup 3&ndash;4 weeks, push weight or reps, then swap in new ones.</p>
+    <div class="snote" id="lowerSnote" style="display:none;"></div>
     <ol id="lowerList"></ol>
   </section>
 
@@ -358,16 +365,14 @@
     <div class="dayhead"><h2>How To Run It</h2><div class="tag">Read once</div></div>
 
     <div class="sched">
-      <h3>The Week</h3>
+      <h3>The Cycle &mdash; 2 On, 2 Off</h3>
       <div class="week">
-        <div class="d U"><small>Mon</small><b>UPPER</b></div>
-        <div class="d L"><small>Tue</small><b>LOWER</b></div>
-        <div class="d"><small>Wed</small><b>OFF</b></div>
-        <div class="d U"><small>Thu</small><b>UPPER</b></div>
-        <div class="d L"><small>Fri</small><b>LOWER</b></div>
-        <div class="d"><small>Sat</small><b>OFF</b></div>
-        <div class="d"><small>Sun</small><b>OFF</b></div>
+        <div class="d U"><small>Day 1</small><b>UPPER</b></div>
+        <div class="d L"><small>Day 2</small><b>LOWER</b></div>
+        <div class="d"><small>Day 3</small><b>OFF</b></div>
+        <div class="d"><small>Day 4</small><b>OFF</b></div>
       </div>
+      <p class="s" style="margin-top:9px;">Train two days, rest two, then start over &mdash; the cycle rolls forward no matter what day of the week it lands on. That's about 3&ndash;4 sessions a week with two full recovery days each round.</p>
     </div>
 
     <p class="note"><b>How a circuit works.</b> Go down the list in order, one move after the next with only 15&ndash;30 seconds between them. That's one round. After the last move, rest 90 sec to 2 min, then repeat. Do 3 rounds to start, build to 4. The list runs heaviest moves first down to the lightest, so you set the dumbbells once for the heavy block and step down as you go &mdash; less time swapping plates, more time moving.</p>
@@ -434,6 +439,11 @@
 
     <!-- WEEK -->
     <div class="dayhead" style="margin-top:24px;"><h2>Your Plan</h2><div class="tag"><a id="genWeek" class="mini">&#10227; Generate</a></div></div>
+    <div class="chips" id="mealScope" style="margin-bottom:10px;">
+      <button class="chip" data-scope="single">Single Meal</button>
+      <button class="chip" data-scope="daily">Daily</button>
+      <button class="chip on" data-scope="weekly">Weekly</button>
+    </div>
     <p class="note" id="weekHint" style="margin-top:0;">Hit Generate and I'll build one day &mdash; breakfast, lunch, dinner, nightcap &mdash; that hits your target, with the full recipe and serving size on each meal. Lunch and dinner get sized up so four meals is enough. Eat it all 7 days; add another week to rotate.</p>
     <div id="week"></div>
   </section>
@@ -525,8 +535,47 @@
   function primeAudio(){ try{ _actx=_actx||new (window.AudioContext||window.webkitAudioContext)(); if(_actx.state==='suspended') _actx.resume(); }catch(e){} }
   function beep(t0,dur,freq){ const o=_actx.createOscillator(),g=_actx.createGain(); o.type='square'; o.frequency.value=freq; o.connect(g); g.connect(_actx.destination); g.gain.setValueAtTime(0.0001,t0); g.gain.exponentialRampToValueAtTime(0.7,t0+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t0+dur); o.start(t0); o.stop(t0+dur+0.02); }
 
+  // Gentle bodyweight plan used when the calculator age is over 70 (sarcopenia / fall-prevention)
+  const seniorUpper = [
+    {n:"Wall or Counter Push-Up", part:"Push", r:"2 × 8–12", w:"hands on wall/counter"},
+    {n:"Chair Press-Up", part:"Push", r:"2 × 5–8", w:"chair arms"},
+    {n:"Shoulder-Blade Squeeze", part:"Posture", r:"2 × 10", w:"sit/stand tall"},
+    {n:"Overhead Reach", part:"Shoulders", r:"2 × 8–10", w:"seated"},
+    {n:"Grip Squeeze", part:"Grip", r:"2 × 10 ea", w:"towel or fist"},
+  ];
+  const seniorLower = [
+    {n:"Sit-to-Stand", part:"Legs", r:"2 × 8–12", w:"sturdy chair"},
+    {n:"Supported Squat", part:"Legs", r:"2 × 8–10", w:"hold counter"},
+    {n:"Standing Heel Raise", part:"Calves", r:"2 × 10–15", w:"hold counter"},
+    {n:"Marching (Knee Raise)", part:"Hips", r:"2 × 10 ea", w:"hold counter"},
+    {n:"Standing Side Leg Raise", part:"Hips", r:"2 × 10 ea", w:"hold counter"},
+    {n:"Step-Up", part:"Legs", r:"2 × 6–8 ea", w:"use a rail · if cleared"},
+    {n:"One-Foot Stand", part:"Balance", r:"10–20 sec ea", w:"hold counter"},
+    {n:"Heel-to-Toe Stand", part:"Balance", r:"10–20 sec", w:"hold counter"},
+  ];
+  const seniorPlan = {Upper:seniorUpper, Lower:seniorLower};
+  function userAge(){ return parseInt((document.getElementById('ca')||{}).value,10)||0; }
+  function seniorURL(name){ return 'https://www.youtube.com/results?search_query='+encodeURIComponent(name+' proper form older adults'); }
+
   function renderDay(dayName){
-    const bank=banks[dayName], sel=sels[dayName], el=document.getElementById(dayName==='Upper'?'upperList':'lowerList');
+    const el=document.getElementById(dayName==='Upper'?'upperList':'lowerList');
+    const swapNote=document.getElementById(dayName==='Upper'?'upperSwapNote':'lowerSwapNote');
+    const snote=document.getElementById(dayName==='Upper'?'upperSnote':'lowerSnote');
+    if(userAge()>70){
+      if(swapNote) swapNote.style.display='none';
+      if(snote){ snote.style.display='block'; snote.innerHTML='<b>Gentle plan (70+).</b> Bodyweight only &mdash; hold a counter or chair, move slowly, and stop for pain or dizziness. Get a doctor or physical therapist to OK it first. Do it 2&ndash;3 days a week.'; }
+      el.innerHTML = seniorPlan[dayName].map(x=>`<li class="ex"><a class="exrow" href="${seniorURL(x.n)}" target="_blank" rel="noopener">
+        <span class="exmid">
+          <span class="exn">${x.n}</span>
+          <span class="exsub"><em>${x.part}</em> &middot; ${x.r} &middot; ${x.w}</span>
+        </span>
+        <span class="explay">&#9658;</span>
+      </a></li>`).join('');
+      return;
+    }
+    if(swapNote) swapNote.style.display='';
+    if(snote) snote.style.display='none';
+    const bank=banks[dayName], sel=sels[dayName];
     el.innerHTML = bank.map((slot,i)=>{
       const x=slot.opts[sel[i]%slot.opts.length];
       const swap = slot.opts.length>1 ? `<button class="swapb" data-day="${dayName}" data-slot="${i}" title="swap movement">&#8644;</button>` : '';
@@ -633,13 +682,14 @@
   let woLog = [];       // logged workouts {date, secs}
   let woRunning=false, woElapsed=0, woIV=null;
   let musicSvc = "youtube";
+  let mealScope = "weekly";
 
   // ---- LOCAL SAVE ----
   const SAVE_KEY = 'poolProgram.v3';
   const A = s => [...s];
   function save(){
     try{
-      const s={goal:curGoal, weeks, blacklist:A(blacklist), shopEmail, workoutLog:woLog, musicSvc,
+      const s={goal:curGoal, weeks, blacklist:A(blacklist), shopEmail, workoutLog:woLog, musicSvc, mealScope,
         selUpper, selLower,
         proteins:A(proteinsOn), carbs:A(carbsOn), veggies:A(veggiesOn), styles:A(stylesOn), bfs:A(bfOn), caps:A(capOn)};
       ['cw','cg','cft','cin','ca','csex','cact','cgoal'].forEach(id=>{const el=document.getElementById(id); if(el) s[id]=el.value;});
@@ -657,6 +707,7 @@
     shopEmail = s.shopEmail || "";
     woLog = Array.isArray(s.workoutLog) ? s.workoutLog : [];
     musicSvc = s.musicSvc || "youtube";
+    mealScope = s.mealScope || "weekly";
     if(Array.isArray(s.selUpper)&&s.selUpper.length===selUpper.length) s.selUpper.forEach((v,i)=>selUpper[i]=v|0);
     if(Array.isArray(s.selLower)&&s.selLower.length===selLower.length) s.selLower.forEach((v,i)=>selLower[i]=v|0);
     weeks = Array.isArray(s.weeks) ? s.weeks.filter(w=>w&&Array.isArray(w.slots)) : [];
@@ -882,39 +933,51 @@
     return `<div class="editor">${swap}${custom}<a class="edcancel" data-ed="cancel">close</a></div>`;
   }
 
+  function mealCardHTML(d,wi,si){
+    const s=d.slots[si];
+    const mult=s.mult!==1?` <span class="pm">${s.mult}&times;</span>`:'';
+    const steps=slotSteps(s).map(x=>`<li>${x}</li>`).join('');
+    const veto=s.kind==="main"?`<a class="vetomeal" data-key="${s.m.key}">veto</a>`:'';
+    const lock=`<a class="wm-lock ${s.locked?'on':''}" data-wi="${wi}" data-si="${si}">${s.locked?'&#128274; locked':'&#128275; lock'}</a>`;
+    const isEd = editing && editing.wi===wi && editing.si===si;
+    const ed = isEd ? editorHTML(s) : '';
+    return `<div class="wm ${s.locked?'locked':''}" data-wi="${wi}" data-si="${si}">
+      <div class="wm-h"><span class="sl">${s.label}</span><b>${slotName(s)}</b>${mult}<span class="mm">${s.cal} &middot; ${s.p}g P</span></div>
+      <div class="wm-serv"><b>Serving:</b> ${slotServing(s)}</div>
+      <ol class="wm-steps">${steps}</ol>
+      <div class="wm-foot">${lock}<a class="wm-edit" data-wi="${wi}" data-si="${si}">&#9998; edit</a><a class="yt rec" href="${ytLink(slotQuery(s))}" target="_blank" rel="noopener">&#9658; recipe</a>${veto}</div>
+      ${ed}
+    </div>`;
+  }
+  function dayTotalHTML(d){
+    const calHit=d.cal>=target.cal*0.9 && d.cal<=target.cal*1.12;
+    const proHit=d.p>=target.pro*0.92;
+    return `<div class="wh"><h4>Daily total</h4><div class="tot"><em class="${calHit?'hit':''}">${d.cal.toLocaleString()}</em> cal &middot; <em class="${proHit?'hit':''}">${d.p}g</em> P</div></div>`;
+  }
   function renderWeeks(){
     const el=document.getElementById('week');
     if(!canBuild()){ el.innerHTML='<p class="note">Pick at least one breakfast, protein, carb, veggie, style, and nightcap (and un-blacklist a combo if you vetoed them all).</p>'; return; }
-    let html="";
-    weeks.forEach((d,wi)=>{
-      const calHit=d.cal>=target.cal*0.9 && d.cal<=target.cal*1.12;
-      const proHit=d.p>=target.pro*0.92;
-      const meals=d.slots.map((s,si)=>{
-        const mult=s.mult!==1?` <span class="pm">${s.mult}&times;</span>`:'';
-        const steps=slotSteps(s).map(x=>`<li>${x}</li>`).join('');
-        const veto=s.kind==="main"?`<a class="vetomeal" data-key="${s.m.key}">veto this combo</a>`:'';
-        const isEd = editing && editing.wi===wi && editing.si===si;
-        const ed = isEd ? editorHTML(s) : '';
-        return `<div class="wm" data-wi="${wi}" data-si="${si}">
-          <div class="wm-h"><span class="sl">${s.label}</span><b>${slotName(s)}</b>${mult}<span class="mm">${s.cal} &middot; ${s.p}g P</span></div>
-          <div class="wm-serv"><b>Serving:</b> ${slotServing(s)}</div>
-          <ol class="wm-steps">${steps}</ol>
-          <div class="wm-foot"><a class="wm-edit" data-wi="${wi}" data-si="${si}">&#9998; edit / swap</a><a class="yt rec" href="${ytLink(slotQuery(s))}" target="_blank" rel="noopener">&#9658; recipe</a>${veto}</div>
-          ${ed}
+    if(!weeks.length){ el.innerHTML=''; document.getElementById('weekHint').style.display='block'; return; }
+    document.getElementById('weekHint').style.display='none';
+    let html='';
+    if(mealScope==='single'){
+      const d=weeks[0]; let si=d.slots.findIndex(s=>s.label==='Lunch'); if(si<0) si=0;
+      html=`<p class="s" style="margin-bottom:8px;">One meal. Lock it to keep it, or hit Generate to re-roll.</p><div class="wday">${mealCardHTML(d,0,si)}</div>`;
+    } else if(mealScope==='daily'){
+      const d=weeks[0];
+      const meals=d.slots.map((s,si)=>mealCardHTML(d,0,si)).join('');
+      html=`<div class="wday">${dayTotalHTML(d)}${meals}</div>`;
+    } else {
+      weeks.forEach((d,wi)=>{
+        const meals=d.slots.map((s,si)=>mealCardHTML(d,wi,si)).join('');
+        const prep=d.slots.map(s=>`<div class="pr"><div><b>${slotName(s)}</b><span class="ig">${slotServing(s)}</span></div><div class="c">&times;7</div></div>`).join('');
+        html+=`<div class="wweek">
+          <div class="wlab"><h4>Week ${wi+1}</h4><div class="sub">Same plan &times;7 days</div></div>
+          <div class="wday">${dayTotalHTML(d)}${meals}</div>
+          <div class="prepbox"><h3>Week ${wi+1} Prep</h3><p class="s">Make 7 of each (one per day). Batch on Sunday.</p>${prep}</div>
         </div>`;
-      }).join('');
-      const prep=d.slots.map(s=>`<div class="pr"><div><b>${slotName(s)}</b><span class="ig">${slotServing(s)}</span></div><div class="c">&times;7</div></div>`).join('');
-      html += `<div class="wweek">
-        <div class="wlab"><h4>Week ${wi+1}</h4><div class="sub">Same plan &times;7 days</div></div>
-        <div class="wday">
-          <div class="wh"><h4>Daily total</h4><div class="tot"><em class="${calHit?'hit':''}">${d.cal.toLocaleString()}</em> cal &middot; <em class="${proHit?'hit':''}">${d.p}g</em> P</div></div>
-          ${meals}
-        </div>
-        <div class="prepbox"><h3>Week ${wi+1} Prep</h3><p class="s">Make 7 of each (one per day). Batch on Sunday.</p>${prep}</div>
-      </div>`;
-    });
-    if(weeks.length) html += `<div class="addweek" id="addWeek">+ Add Another Week</div>`;
-    if(weeks.length){
+      });
+      html += `<div class="addweek" id="addWeek">+ Add Another Week</div>`;
       html += `<div class="shopbox">
         <h3>Shopping List &middot; Upcoming Week</h3>
         <pre id="shopText">${buildShoppingText(weeks[0]).replace(/</g,'&lt;')}</pre>
@@ -928,6 +991,10 @@
       </div>`;
     }
     el.innerHTML=html;
+    el.querySelectorAll('.wm-lock').forEach(b=>b.addEventListener('click',()=>{
+      const d=weeks[+b.dataset.wi]; const s=d&&d.slots[+b.dataset.si];
+      if(s){ s.locked=!s.locked; renderWeeks(); save(); }
+    }));
     const aw=document.getElementById('addWeek');
     if(aw) aw.addEventListener('click',()=>{const d=buildDistinctDay(weeks);if(d){weeks.push(d);renderWeeks();save();}});
     el.querySelectorAll('.vetomeal').forEach(b=>b.addEventListener('click',()=>{
@@ -936,34 +1003,31 @@
       if(!weeks.length){const d=buildDistinctDay([]); if(d) weeks=[d];}
       renderWeeks(); renderPool(); save();
     }));
-    // open editor
     el.querySelectorAll('.wm-edit').forEach(b=>b.addEventListener('click',()=>{
       editing={wi:+b.dataset.wi, si:+b.dataset.si}; renderWeeks();
     }));
-    // editor actions (only one editor open at a time)
     if(editing){
       const card=el.querySelector(`.wm[data-wi="${editing.wi}"][data-si="${editing.si}"]`);
       const d=weeks[editing.wi]; const s=d&&d.slots[editing.si];
       if(card && s){
         const close=()=>{ editing=null; renderWeeks(); };
-        const q=sel=>card.querySelector(sel);
         const act=name=>card.querySelector(`[data-ed="${name}"]`);
         const cancelEl=act('cancel'); if(cancelEl) cancelEl.addEventListener('click',close);
         const am=act('applymain'); if(am) am.addEventListener('click',()=>{
           const get=k=>card.querySelector(`[data-edk="${k}"]`).value;
           const fid=get('fid'),pid=get('pid'),cid=get('cid'),vid=get('vid');
-          d.slots[editing.si]={label:s.label,kind:'main',m:{fid,pid,cid,vid,key:fid+'|'+pid+'|'+cid}};
+          d.slots[editing.si]={label:s.label,locked:s.locked,kind:'main',m:{fid,pid,cid,vid,key:fid+'|'+pid+'|'+cid}};
           recomputeDay(d); editing=null; renderWeeks(); save();
         });
         const ap=act('applypick'); if(ap) ap.addEventListener('click',()=>{
           const id=card.querySelector('[data-ed="pick"]').value;
-          d.slots[editing.si]={label:s.label,kind:(s.label==='Breakfast'?'bf':'cap'),id};
+          d.slots[editing.si]={label:s.label,locked:s.locked,kind:(s.label==='Breakfast'?'bf':'cap'),id};
           recomputeDay(d); editing=null; renderWeeks(); save();
         });
         const ac=act('applycustom'); if(ac) ac.addEventListener('click',()=>{
           const v=k=>card.querySelector(`[data-edc="${k}"]`).value.trim();
           const name=v('name')||'My Recipe';
-          d.slots[editing.si]={label:s.label,kind:'custom',name,cal:+v('cal')||0,p:+v('p')||0,ing:v('ing'),steps:[]};
+          d.slots[editing.si]={label:s.label,locked:s.locked,kind:'custom',name,cal:+v('cal')||0,p:+v('p')||0,ing:v('ing'),steps:[]};
           recomputeDay(d); editing=null; renderWeeks(); save();
         });
       }
@@ -972,10 +1036,9 @@
     if(em) em.addEventListener('input',()=>{ shopEmail=em.value.trim(); save(); });
     const send=document.getElementById('shopSend');
     if(send) send.addEventListener('click',()=>{
-      const txt=buildShoppingText(weeks[0]);
       const to=encodeURIComponent((document.getElementById('shopEmail')||{}).value||'');
       const sub=encodeURIComponent('Pool Program — Shopping List (Upcoming Week)');
-      window.location.href=`mailto:${to}?subject=${sub}&body=${encodeURIComponent(txt)}`;
+      window.location.href=`mailto:${to}?subject=${sub}&body=${encodeURIComponent(buildShoppingText(weeks[0]))}`;
     });
     const cp=document.getElementById('shopCopy');
     if(cp) cp.addEventListener('click',async()=>{
@@ -985,17 +1048,33 @@
     });
     const rs=document.getElementById('recSend');
     if(rs) rs.addEventListener('click',()=>{
-      const txt=buildRecipesText(weeks[0]);
       const to=encodeURIComponent((document.getElementById('shopEmail')||{}).value||'');
       const sub=encodeURIComponent("Pool Program — This Week's Recipes");
-      window.location.href=`mailto:${to}?subject=${sub}&body=${encodeURIComponent(txt)}`;
+      window.location.href=`mailto:${to}?subject=${sub}&body=${encodeURIComponent(buildRecipesText(weeks[0]))}`;
     });
   }
+  function rerollSlot(s){
+    if(s.locked) return;
+    if(s.label==='Breakfast'){ s.kind='bf'; s.id=rnd([...bfOn]); delete s.name; delete s.ing; }
+    else if(s.label==='Nightcap'){ s.kind='cap'; s.id=rnd([...capOn]); delete s.name; delete s.ing; }
+    else { const m=pickMain(); if(m){ s.kind='main'; s.m=m; delete s.name; delete s.ing; delete s.steps; } }
+  }
   function generateWeek(){
+    if(!canBuild()){ renderWeeks(); return; }
     document.getElementById('weekHint').style.display='none';
-    weeks=[]; const d=buildDistinctDay(weeks); if(d) weeks.push(d); renderWeeks(); save();
+    if(!weeks.length){ const d=buildDistinctDay(weeks); if(d) weeks=[d]; renderWeeks(); save(); return; }
+    const d=weeks[0];
+    if(mealScope==='single'){ let si=d.slots.findIndex(s=>s.label==='Lunch'); if(si<0) si=0; rerollSlot(d.slots[si]); }
+    else d.slots.forEach(rerollSlot);
+    recomputeDay(d); renderWeeks(); save();
   }
   document.getElementById('genWeek').addEventListener('click',generateWeek);
+  function setMealScope(sc){
+    mealScope=sc;
+    document.querySelectorAll('#mealScope .chip').forEach(b=>b.classList.toggle('on',b.dataset.scope===sc));
+    renderWeeks(); save();
+  }
+  document.querySelectorAll('#mealScope .chip').forEach(b=>b.addEventListener('click',()=>setMealScope(b.dataset.scope)));
 
 
 
@@ -1044,6 +1123,7 @@
       document.getElementById('week').innerHTML='';
       document.getElementById('weekHint').style.display='block';
     }
+    if(typeof renderWorkouts==='function') renderWorkouts();   // age may flip the gentle 70+ plan on/off
     save();
   }
   // populate the dropdowns (faster than typing on a phone)
@@ -1070,6 +1150,7 @@
   calc();
   renderPool();
   renderWorkouts();
+  setMealScope(mealScope);
   if(weeks.length){ document.getElementById('weekHint').style.display='none'; renderWeeks(); }
 
   // ---- WORKOUT TIMER (controlled from Upper/Lower pages) ----
